@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "module": "CommonJS",
+        "target": "ES2020",
+        "baseUrl": ".",
+        "outDir": "dist",
+        "rootDir": "src",
+
+        "incremental": true,
+        "esModuleInterop": true,
+        "declaration": true,
+        "sourceMap": true,
+
+        "paths": {
+            "mini-signals": [
+                "node_modules/resource-loader/typings/mini-signals.d.ts"
+            ]
+        }
+    },
+
+    "include": ["src/**/*"]
+}
