@@ -1,13 +1,14 @@
 {
   "name": "pixi-spriter",
-  "version": "0.1.0",
+  "version": "0.3.0",
+  "private": true,
   "description": "Spriter animation playback engine for pixi.js.",
-  "files": [
-    "dist"
-  ],
   "scripts": {
+    "build": "npm run clean && npm run compile",
     "compile": "tsc -b ./tsconfig.json",
-    "publish": "npm run compile && npm publish"
+    "clean": "node scripts/clean",
+    "test-pack": "npm run build && node scripts/prepublish && cd dist && npm pack",
+    "release": "npm run build && node scripts/prepublish && cd dist && npm publish"
   },
   "dependencies": {
     "@pixi/display": "^6.0.2",
@@ -16,6 +17,8 @@
     "@pixi/utils": "^6.0.2"
   },
   "devDependencies": {
+    "node": "^16.1.0",
+    "rimraf": "^3.0.2",
     "typescript": "^4.2.4"
   },
   "repository": {
@@ -28,8 +31,8 @@
   ],
   "author": {
     "name": "Brinsley Blackwood",
-    "email" : "brinsleylogic@gmail.com",
-    "url" : "https://brinsleylogic.github.io/"
+    "email": "brinsleylogic@gmail.com",
+    "url": "https://brinsleylogic.github.io/"
   },
   "license": "MIT",
   "bugs": {
