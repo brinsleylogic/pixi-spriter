@@ -5,7 +5,9 @@ const cwd = process.cwd();
 const file = readFileSync(resolve(cwd, "package.json"));
 const json = JSON.parse(file.toString());
 
+delete json.devDependencies;
 delete json.private;
+delete json.scripts;
 
 console.log("Writing package.json to 'dist' folder.");
 

@@ -1,42 +1,45 @@
 {
-  "name": "pixi-spriter",
-  "version": "0.3.0",
-  "private": true,
-  "description": "Spriter animation playback engine for pixi.js.",
-  "scripts": {
-    "build": "npm run clean && npm run compile",
-    "compile": "tsc -b ./tsconfig.json",
-    "clean": "node scripts/clean",
-    "test-pack": "npm run build && node scripts/prepublish && cd dist && npm pack",
-    "release": "npm run build && node scripts/prepublish && cd dist && npm publish"
-  },
-  "dependencies": {
-    "@pixi/display": "^6.0.2",
-    "@pixi/loaders": "^6.0.2",
-    "@pixi/sprite": "^6.0.2",
-    "@pixi/utils": "^6.0.2"
-  },
-  "devDependencies": {
-    "node": "^16.1.0",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.2.4"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/brinsleylogic/pixi-spriter.git"
-  },
-  "keywords": [
-    "spriter",
-    "pixi.js"
-  ],
-  "author": {
-    "name": "Brinsley Blackwood",
-    "email": "brinsleylogic@gmail.com",
-    "url": "https://brinsleylogic.github.io/"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/brinsleylogic/pixi-spriter/issues"
-  },
-  "homepage": "https://github.com/brinsleylogic/pixi-spriter#readme"
+    "name": "pixi-spriter",
+    "version": "0.3.0",
+    "private": true,
+    "description": "Spriter animation playback engine for pixi.js.",
+    "scripts": {
+        "build": "npm run clean && npm run compile",
+        "compile": "tsc -b ./tsconfig.json",
+        "clean": "node scripts/clean",
+        "postinstall": "scripts/linkDemoDep",
+        "release": "npm run build && node scripts/prepublish && cd dist && npm publish",
+        "test-pack": "npm run build && node scripts/prepublish && cd dist && npm pack"
+    },
+    "dependencies": {
+        "@pixi/display": "^6.0.2",
+        "@pixi/loaders": "^6.0.2",
+        "@pixi/sprite": "^6.0.2",
+        "@pixi/utils": "^6.0.2"
+    },
+    "devDependencies": {
+        "node": "^16.1.0",
+        "rimraf": "^3.0.2",
+        "typescript": "^4.2.4"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/brinsleylogic/pixi-spriter.git"
+    },
+    "keywords": [
+        "spriter",
+        "spriter pro",
+        "animation",
+        "pixi.js"
+    ],
+    "author": {
+        "name": "Brinsley Blackwood",
+        "email": "brinsleylogic@gmail.com",
+        "url": "https://brinsleylogic.github.io/"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/brinsleylogic/pixi-spriter/issues"
+    },
+    "homepage": "https://github.com/brinsleylogic/pixi-spriter#readme"
 }
