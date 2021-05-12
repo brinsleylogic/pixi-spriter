@@ -91,6 +91,13 @@ export default class Animator {
     }
 
     /**
+     * Resumes playback if previously stopped.
+     *
+     * @memberof Animator
+     */
+    public play(): void;
+
+    /**
      * Plays the animation.
      *
      * @param {number} id The animation identifier.
@@ -114,7 +121,15 @@ export default class Animator {
      */
     public play(animation: IAnimation): void;
 
-    public play(arg: number | string | IAnimation): void {
+    public play(arg?: number | string | IAnimation): void {
+        if (arguments.length === 0) {
+            if (this._current) {
+                this._playing = true;
+            }
+
+            return;
+        }
+
         if (typeof arg === "object") {
             return this.setAnimation(arg);
         }
@@ -136,6 +151,15 @@ export default class Animator {
                 return this.setAnimation(anims[i]);
             }
         }
+    }
+
+    /**
+     * Halts playback (stops the Animtor from updating internally).
+     *
+     * @memberof Animator
+     */
+    public stop(): void {
+        this._playing = false;
     }
 
     /**
@@ -284,6 +308,11 @@ export default class Animator {
      * @memberof Animator
      */
     private setAnimation(animation: IAnimation): void {
+        if (animation && this._current === animation) {
+            this._playing = true;
+            return;
+        }
+
         this._current = animation;
         this._next = null;
 

@@ -30,4 +30,4 @@ The `pixi-spriter` library provides a simple set of classes to (hopefully) make 
 
 ## Performance
 
-Need to benchmark and optimise.
+Still need to benchmark and optimise.

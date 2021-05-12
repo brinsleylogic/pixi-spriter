@@ -5,17 +5,17 @@
     "description": "Spriter animation playback engine for pixi.js.",
     "scripts": {
         "build": "npm run clean && npm run compile",
-        "compile": "tsc -b ./tsconfig.json",
+        "compile": "tsc",
         "clean": "node scripts/clean",
-        "postinstall": "scripts/linkDemoDep",
+        "postinstall": "node scripts/linkDemoDep",
         "release": "npm run build && node scripts/prepublish && cd dist && npm publish",
-        "test-pack": "npm run build && node scripts/prepublish && cd dist && npm pack"
+        "test-pack": "npm run build && node scripts/prepublish && cd dist && npm pack",
+        "watch": "tsc --watch"
     },
     "dependencies": {
         "@pixi/display": "^6.0.2",
         "@pixi/loaders": "^6.0.2",
-        "@pixi/sprite": "^6.0.2",
-        "@pixi/utils": "^6.0.2"
+        "@pixi/sprite": "^6.0.2"
     },
     "devDependencies": {
         "node": "^16.1.0",

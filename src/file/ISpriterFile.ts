@@ -386,6 +386,7 @@ export interface IObjectState {
     scale_y: number;
     x: number;
     y: number;
+    a: number;
 
     // Injected when file is parsed.
     id: number;

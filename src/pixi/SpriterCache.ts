@@ -1,3 +1,4 @@
+import { Texture } from "@pixi/core";
 import ISpriterFile, { IFile } from "../file/ISpriterFile";
 
 /**
@@ -8,7 +9,19 @@ import ISpriterFile, { IFile } from "../file/ISpriterFile";
  */
 export default class SpriterCache {
     private static _fileCache: Record<string, IFile>;
+    private static _textureCache: Record<string, Texture>;
     private static _defaultName: string;
+
+    /**
+     * Sets the objecty to use to retrieve textures from.
+     *
+     * @static
+     * @param {Record<string, Texture>} textureCache The texture lookup object.
+     * @memberof SpriterCache
+     */
+    public static setTextureCache(textureCache: Record<string, Texture>): void {
+        this._textureCache = textureCache;
+    }
 
     /**
      * Processes and chaches data from the file.
@@ -43,7 +56,29 @@ export default class SpriterCache {
         return this._fileCache?.[this.getKey(name, folderId, fileId)];
     }
 
+    public static getTexture(name: string): Texture;
 
+    public static getTexture(folderId: number, fileId: number): Texture;
+
+    public static getTexture(arg: number | string, fileId?: number): Texture {
+        const name = (typeof arg === "string")
+            ? arg
+            : this.getFile(arg, fileId).name;
+
+        return this._textureCache[name];
+    }
+
+    /**
+     * Generates a unique key based on the proprties supplied.
+     *
+     * @private
+     * @static
+     * @param {string} name
+     * @param {number} folder
+     * @param {number} file
+     * @returns {string}
+     * @memberof SpriterCache
+     */
     private static getKey(name: string, folder: number, file: number): string {
         return `${name ?? this._defaultName}_${folder}_${file}`;
     }
