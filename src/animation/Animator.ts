@@ -5,7 +5,7 @@ import Event from "./Event";
 import extrapolate from "../utils/extrapolate";
 
 /**
- * Responsible for interfacing with and translating the Spriter animaitons/timelines in to something more usable.
+ * Responsible for interfacing with and translating the Spriter animations/timelines in to something more usable.
  *
  * @export
  * @class Animator
@@ -30,6 +30,8 @@ export default class Animator {
 
     private _current: IAnimation;
     private _next: IAnimation;
+
+    private _currentFrame: IMainlineKeyFrame;
 
     private _playing: boolean;
     private _playTime: number;
@@ -78,6 +80,7 @@ export default class Animator {
      */
     public setEntity(entity: IEntity): this {
         this._entity = entity;
+        this._currentFrame = undefined;
 
         if (this._current) {
             this._current = entity.animation[this._current.id];
@@ -351,21 +354,33 @@ export default class Animator {
     private getKeyFrames(animation: IAnimation, time: number): [IMainlineKeyFrame, IMainlineKeyFrame?] {
         const frames = animation.mainline.key;
 
-        for (let i = 0, l = frames.length; i < l; i++) {
-            const current = frames[i];
-            const next = frames[i + 1];
+        let current = this._currentFrame ?? frames[0];
 
-            if (next == null) {
-                if (animation.looping || animation.looping == null) {
-                    return [current, frames[0]];
+        do {
+            // Start time of frame is less than the time.
+            if (current.time <= time) {
+                // We're in the last frame.
+                if (current.next == null) {
+                    break;
+
+                // We're in the current frame.
+                } else if (time < current.next.time || current.next.time === 0) {
+                    break;
                 }
-
-                return [current];
             }
 
-            if (current.time <= time && time < next.time) {
-                return [current, next];
+            // No next frame to check, skip check.
+            if (current.next == null) {
+                current = current.next;
+                continue;
             }
+
+            current = current.next;
         }
+        while (current.next);
+
+        this._currentFrame = current;
+
+        return [current, current.next];
     }
 }

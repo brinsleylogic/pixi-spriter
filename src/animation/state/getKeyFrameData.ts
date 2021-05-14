@@ -10,7 +10,7 @@ import { IBoneState, ISpriteState } from "./IAnimatorState";
  * @returns {IFrame}
  */
 export default function getKeyFrameData(animation: IAnimation, keyFrame: IMainlineKeyFrame): IFrame {
-    const state = { bones: [], sprites: [] };
+    let bones = [], sprites = [];
 
     let i = keyFrame.bone_ref.length;
 
@@ -18,8 +18,7 @@ export default function getKeyFrameData(animation: IAnimation, keyFrame: IMainli
         const ref = keyFrame.bone_ref[i];
         const timeline = animation.timeline[ref.timeline];
 
-        state.bones[i] = {
-            ...empty,
+        bones[i] = {
             ...timeline.key[ref.key].bone,
             parent: ref.parent,
         };
@@ -31,22 +30,14 @@ export default function getKeyFrameData(animation: IAnimation, keyFrame: IMainli
         const ref = keyFrame.object_ref[i];
         const timeline = animation.timeline[ref.timeline];
 
-        state.sprites[i] = {
-            ...empty,
+        sprites[i] = {
             ...timeline.key[ref.key].object,
             parent: ref.parent,
         };
     }
 
-    return state;
+    return { bones, sprites };
 }
-
-const empty = {
-    x: 0,
-    y: 0,
-    scale_x: 1,
-    scale_y: 1,
-};
 
 interface IFrame {
     bones: IBoneState[];

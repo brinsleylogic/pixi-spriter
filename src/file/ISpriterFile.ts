@@ -150,6 +150,13 @@ export interface IObjectInfo {
         file: number;
         folder: number;
     }[];
+
+    var_defs: {
+            default: number | string;
+            id: number;
+            name: string;
+            type: "float" | "int" | "string";
+    }[];
 }
 
 export interface IBoneInfo {
@@ -249,6 +256,19 @@ interface ITimeline {
     id: number;
     name: string;
     key: ITimelineKeyFrame[];
+
+    // Used to reference Entity.obj_info data.
+    obj?: number;
+
+    meta?: {
+        tagline: {
+            key: ITaglineKeyFrame[];
+        };
+
+        valline: {
+            key: IVallineKeyFrame[];
+        }
+    }
 }
 
 /**
@@ -288,6 +308,16 @@ export interface IMainlineKeyFrame {
      * @memberof IMainlineKeyFrame
      */
     object_ref: IObjectRef[];
+
+    // Injected when file is parsed.
+
+    /**
+     * The key frame that follows this one.
+     *
+     * @type {IMainlineKeyFrame}
+     * @memberof IMainlineKeyFrame
+     */
+    next?: IMainlineKeyFrame;
 }
 
 /**
@@ -301,6 +331,9 @@ export interface IBoneRef {
     key: number;
     timeline: number;
     parent: number;
+
+    // Injected when file is parsed.
+    name: string;
 }
 
 /**
@@ -315,6 +348,9 @@ export interface IObjectRef {
     parent: number;
     timeline: number;
     z_index: number;
+
+    // Injected when file is parsed.
+    name: string;
 }
 
 /**
@@ -376,6 +412,7 @@ export interface IBoneState {
 
     // Injected when file is parsed.
     id: number;
+    name: string;
 }
 
 export interface IObjectState {
@@ -390,5 +427,31 @@ export interface IObjectState {
 
     // Injected when file is parsed.
     id: number;
+    name: string;
     z_index: number;
+}
+
+interface ITaglineKeyFrame {
+    id: number;
+    time: number;
+    tag: {
+        id: number;
+
+        /**
+         * The identifier for the associated tag.
+         *
+         * @type {number}
+         */
+        t: number;
+    }[];
+}
+
+interface IVallineKeyFrame {
+    def: number,
+    id: 0,
+    key: {
+        id: number;
+        time: number;
+        val: number | string;
+    }[];
 }

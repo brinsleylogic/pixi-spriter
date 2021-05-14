@@ -4,11 +4,11 @@ import Animator from "../animation/Animator";
 import { IBoneState, ISpriteState } from "../animation/state/IAnimatorState";
 import { IEntity } from "../file/ISpriterFile";
 import SpriterCache from "./SpriterCache";
+import { Texture } from "@pixi/core";
 
 export default class SpriterContainer extends Container {
     private _animator: Animator;
     private _container: Container;
-    private _bones: IBoneState[];
     private _sprites: Component[];
 
     /**
@@ -41,11 +41,11 @@ export default class SpriterContainer extends Container {
             this._container.destroy({ children: true });
         }
 
-        this._bones = [];
         this._sprites = [];
 
         this._container = new Container();
         this._container.setParent(this);
+        this._container.sortableChildren = true;
 
         return this;
     }
@@ -77,14 +77,6 @@ export default class SpriterContainer extends Container {
 
         const state = this._animator.update(delta);
 
-        this._bones = state.bones;
-
-        for (let i = 1, l = state.bones.length; i < l; i++) {
-            const bone = state.bones[i];
-
-            this.applyParentProps(bone, state.bones[bone.parent]);
-        }
-
         for (let i = 0, l = state.sprites.length; i < l; i++) {
             const data = state.sprites[i];
 
@@ -93,10 +85,12 @@ export default class SpriterContainer extends Container {
             if (sprite == null) {
                 sprite = new Component();
                 sprite.setParent(this._container);
+                sprite.name = data.name;
+
                 this._sprites[data.id] = sprite;
             }
 
-            this.applyState(sprite, data);
+            this.drawSprite(sprite, data);
         }
     }
 
@@ -108,9 +102,7 @@ export default class SpriterContainer extends Container {
      * @param {ISpriteState} state The state to apply.
      * @memberof SpriterContainer
      */
-    private applyState(component: Component, state: ISpriteState): void {
-        this.applyParentProps(state, this._bones[state.parent]);
-
+    private drawSprite(component: Component, state: ISpriteState): void {
         component.spriter = state;
         component.position.set(state.x, state.y);
         component.scale.set(state.scale_x, state.scale_y);
@@ -120,7 +112,7 @@ export default class SpriterContainer extends Container {
         }
 
         if (state.angle != null) {
-            component.rotation = this.toRadians(state.angle);
+            component.angle = state.angle;
         }
 
         // Update the texture.
@@ -136,7 +128,6 @@ export default class SpriterContainer extends Container {
 
         component.texture = SpriterCache.getTexture(fileData.name);
 
-        component.name = fileData.name;
         component.width = fileData.width;
         component.height = fileData.height;
 
@@ -144,45 +135,6 @@ export default class SpriterContainer extends Container {
             fileData.pivot_x * fileData.width,
             fileData.pivot_y * fileData.height
         );
-    }
-
-    /**
-     * Applies the properties of the parent to the child transform.
-     *
-     * @private
-     * @param {(IBoneState | ISpriteState)} child The child transform.
-     * @param {IBoneState} parent The parent transform.
-     * @memberof SpriterContainer
-     */
-    private applyParentProps(child: IBoneState | ISpriteState, parent: IBoneState): void {
-        const x = child.x * parent.scale_x;
-        const y = child.y * parent.scale_y;
-
-        const parentAngle = this.toRadians(parent.angle);
-        const sin = Math.sin(parentAngle);
-        const cos = Math.cos(parentAngle);
-
-        child.x = ((x * cos) - (y * sin)) + parent.x;
-        child.y = ((x * sin) - (y * cos)) + parent.y;
-
-        child.scale_x *= parent.scale_x;
-        child.scale_y *= parent.scale_y;
-
-        if (child.angle != null) {
-            child.angle = Math.sign(parent.scale_x * parent.scale_y) * (child.angle + parent.angle) % 360;
-        }
-    }
-
-    /**
-     * Converts the supplied angle from degrees to Radians.
-     *
-     * @private
-     * @param {number} degrees The angle to convert.
-     * @returns {number}
-     * @memberof SpriterContainer
-     */
-    private toRadians(degrees: number): number {
-        return degrees * Math.PI / 180;
     }
 }
 
