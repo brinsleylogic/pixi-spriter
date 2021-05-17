@@ -289,7 +289,7 @@ export default class Animator {
 
             // Calculate the current state.
             } else {
-                const progress = extrapolate(startFrame.time, endFrame.time, this._playTime);
+                const progress = extrapolate(startFrame.time, endFrame.time || animation.length, this._playTime);
 
                 state = AnimationState.from(animation, startFrame, endFrame, progress);
             }

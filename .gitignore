@@ -1,6 +1,9 @@
-dist
+# build files
 node_modules
 *.tsbuildinfo
+/dist
 
-!demo/dist
-demo
+# demo files
+demo/dist/*
+!demo/dist/assets
+!demo/dist/index.html
