@@ -1,4 +1,4 @@
-import { IBoneState as IBaseBoneState, IObjectState } from "../../file/ISpriterFile";
+import { ITimelineBone, ITimelineObject } from "../file/IParsedFile";
 
 /**
  * Represesnts the current state of an Animator.
@@ -18,16 +18,17 @@ export default interface IAnimatorState {
     /**
      * The state of the sprite components.
      *
-     * @type {IObjectState[]}
+     * @type {ISpriteState[]}
      * @memberof IAnimatorState
      */
     sprites: ISpriteState[];
 }
 
-export interface IBoneState extends IBaseBoneState {
-    parent: number;
-}
+export interface IBoneState extends ITimelineBone, IState {}
 
-export interface ISpriteState extends IObjectState {
+export interface ISpriteState extends ITimelineObject, IState {}
+
+interface IState {
     parent: number;
+    timeline: number;
 }

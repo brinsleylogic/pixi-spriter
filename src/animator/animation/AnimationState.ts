@@ -1,5 +1,5 @@
-import { IAnimation, IMainlineKeyFrame } from "../../file/ISpriterFile";
-import IAnimatorState, { IBoneState, ISpriteState } from "./IAnimatorState";
+import { IAnimation, IMainlineKeyFrame } from "../../file/IParsedFile";
+import IAnimatorState, { IBoneState, ISpriteState } from "../IAnimatorState";
 import getKeyFrameData from "./getKeyFrameData";
 import interpolate from "../../utils/interpolate";
 import interpolateAngle from "../../utils/interpolateAngle";
@@ -12,11 +12,7 @@ import interpolateAngle from "../../utils/interpolateAngle";
  * @class AnimationState
  * @implements {IAnimatorState}
  */
-export default class AnimationState implements IAnimatorState {
-    public bones: IBoneState[];
-
-    public sprites: ISpriteState[];
-
+export default class AnimationState {
     /**
      * Creates an instance of AnimationState.
      *
@@ -24,7 +20,7 @@ export default class AnimationState implements IAnimatorState {
      * @param {IMainlineKeyFrame} frame The state of the animation.
      * @memberof AnimationState
      */
-    public constructor(animation: IAnimation, frame: IMainlineKeyFrame);
+    public static from(animation: IAnimation, frame: IMainlineKeyFrame): IAnimatorState;
 
     /**
      * Creates an instance of AnimationState.
@@ -35,19 +31,16 @@ export default class AnimationState implements IAnimatorState {
      * @param {number} percentage The progression between the two frames.
      * @memberof AnimationState
      */
-    public constructor(animation: IAnimation, startFrame: IMainlineKeyFrame, endFrame: IMainlineKeyFrame, percentage: number);
+    public static from(animation: IAnimation, startFrame: IMainlineKeyFrame, endFrame: IMainlineKeyFrame, percentage: number): IAnimatorState
 
-    public constructor(animation: IAnimation, arg: IMainlineKeyFrame, endFrame?: IMainlineKeyFrame, percentage?: number) {
-        this.bones = [];
-        this.sprites = [];
-
-        // Just set the state form the supplied `arg`.
+    public static from(animation: IAnimation, arg: IMainlineKeyFrame, endFrame?: IMainlineKeyFrame, percentage?: number): IAnimatorState {
+        // Just set the state from the supplied `arg`.
         if (endFrame == null) {
-            const data = getKeyFrameData(animation, arg);
-            this.bones = data.bones;
-            this.sprites = data.sprites;
-            return;
+            return getKeyFrameData(animation, arg);
         }
+
+        const bones = [];
+        const sprites = [];
 
         const startBones = [];
         const endBones = [];
@@ -67,7 +60,7 @@ export default class AnimationState implements IAnimatorState {
             startBones.push(s);
             endBones.push(e);
 
-            this.bones[i] = this.getState(s, e, percentage);
+            bones[i] = this.getState(s, e, percentage);
         }
 
         let i = start.sprites.length;
@@ -76,11 +69,21 @@ export default class AnimationState implements IAnimatorState {
             const s = start.sprites[i];
             const e = end.sprites[i];
 
-            this.applyParentProps(s, startBones[s.parent]);
-            this.applyParentProps(e, endBones[e.parent]);
+            if (s.parent != null) {
+                this.applyParentProps(s, startBones[s.parent]);
+            }
 
-            this.sprites[i] = this.getState(start.sprites[i], end.sprites[i], percentage);
+            if (e.parent != null) {
+                this.applyParentProps(e, endBones[e.parent]);
+            }
+
+            sprites[i] = this.getState(start.sprites[i], end.sprites[i], percentage);
         }
+
+        return {
+            bones,
+            sprites,
+        };
     }
 
     /**
@@ -93,8 +96,13 @@ export default class AnimationState implements IAnimatorState {
      * @returns {T}
      * @memberof AnimationState
      */
-    private getState<T extends IBoneState = IBoneState>(start: T, end: T, progress: number): T {
-        const state: T = { id: start.id, parent: start.parent } as any;
+    private static getState<T extends IBoneState = IBoneState>(start: T, end: T, progress: number): T {
+        const state: T = {
+            id: start.id,
+            parent: start.parent,
+            name: start.name,
+            timeline: start.timeline,
+        } as any;
 
         this.buildState(state, Object.keys(start), start, end, progress);
         this.buildState(state, Object.keys(end), start, end, progress);
@@ -114,7 +122,7 @@ export default class AnimationState implements IAnimatorState {
      * @param {number} progress
      * @memberof AnimationState
      */
-    private buildState<T extends IBoneState>(state: T, propNames: string[], start: T, end: T, progress: number): void {
+    private static buildState<T extends IBoneState>(state: T, propNames: string[], start: T, end: T, progress: number): void {
         let i = propNames.length;
 
         while (i-- > 0) {
@@ -143,10 +151,6 @@ export default class AnimationState implements IAnimatorState {
             state[prop] = (prop === "angle")
                 ? interpolateAngle(s, e, progress)
                 : interpolate(s, e, progress);
-
-            // if (prop === "angle") {
-            //     console.log("Angle interp", state["name"], s, state[prop], e, progress);
-            // }
         }
     }
 
@@ -158,8 +162,7 @@ export default class AnimationState implements IAnimatorState {
      * @param {IBoneState} parent The parent transform.
      * @memberof AnimationState
      */
-    private applyParentProps(child: IBoneState | ISpriteState, parent: IBoneState): void {
-        // console.log("applyParentProps :: child:", child.name, child.id, "parent:", parent.name, parent.id, child.parent);
+    private static applyParentProps(child: IBoneState | ISpriteState, parent: IBoneState): void {
         const x = child.x * parent.scale_x;
         const y = child.y * parent.scale_y;
 

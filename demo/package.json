@@ -1,0 +1,29 @@
+{
+  "name": "pixi-spriter-demo",
+  "description": "Spriter animation playback engine for pixi.js.",
+  "version": "0.1.0",
+  "dependencies": {
+    "@pixi/app": "^6.0.2",
+    "@pixi/display": "^6.0.2",
+    "@pixi/loaders": "^6.0.2",
+    "@pixi/sprite": "^6.0.2",
+    "@pixi/spritesheet": "^6.0.2",
+    "@pixi/text": "^6.0.2",
+    "@pixi/utils": "^6.0.2",
+    "express": "^4.17.1",
+    "node": "^16.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.11",
+    "@types/node": "^14.14.41",
+    "ts-loader": "^9.1.1",
+    "typescript": "^4.2.4",
+    "webpack": "^5.35.1",
+    "webpack-cli": "^4.6.0"
+  },
+  "scripts": {
+    "client": "webpack",
+    "server": "webpack -c webpack.server.js && npm start",
+    "start": "node dist/server"
+  }
+}

@@ -53,7 +53,16 @@ export default interface ISpriterFile {
      */
     scon_version: string;
 
-    tag_list: {
+    /**
+     * Lookup of tag data for contained entities.
+     *
+     * @type {{
+     *         id: number;
+     *         name: string;
+     *     }[]}
+     * @memberof ISpriterFile
+     */
+    tag_list?: {
         id: number;
         name: string;
     }[];
@@ -136,27 +145,22 @@ export interface IEntity {
      * @type {(IObjectInfo | IBoneInfo)[]}
      * @memberof IEntity
      */
-    obj_info: (IObjectInfo | IBoneInfo)[];
+    obj_info: (IBoneInfo | IEventInfo | IObjectInfo)[];
 
-    // TODO : Figure this out.
     character_map: ICharacterMap[];
+
+    var_defs?: IVarDef[];
 }
 
 export interface IObjectInfo {
-    type: "sprite";
+    type: "sprite" | "point";
     name: string;
-
     frames: {
         file: number;
         folder: number;
     }[];
 
-    var_defs: {
-            default: number | string;
-            id: number;
-            name: string;
-            type: "float" | "int" | "string";
-    }[];
+    var_defs?: IVarDef[];
 }
 
 export interface IBoneInfo {
@@ -165,6 +169,23 @@ export interface IBoneInfo {
 
     w: number;
     h: number,
+
+    var_defs?: IVarDef[];
+}
+
+export interface IEventInfo {
+    type: "event";
+    name: string;
+    frames?: [];
+
+    var_defs?: IVarDef[];
+}
+
+export interface IVarDef {
+    default: number | string;
+    id: number;
+    name: string;
+    type: "float" | "int" | "string";
 }
 
 interface ICharacterMap {
@@ -236,15 +257,48 @@ export interface IAnimation {
     };
 
     /**
-     * The object animation timeline.
+     * The object-specific animation timeline.
      *
      * @type {ITimeline[]}
      * @memberof IAnimation
      */
     timeline: ITimeline[];
 
-    eventline?: any[];
+    /**
+     * The event timeline.
+     *
+     * @type {IEventline[]}
+     * @memberof IAnimation
+     */
+    eventline?: IEventline[];
+
     soundline?: any[];
+
+    meta?: IMetaData;
+}
+
+export interface IMetaData {
+    tagline?: {
+        key: ITaglineKeyFrame[];
+    };
+
+    valline?: {
+        def: number,
+        id: number;
+        key: IVallineKeyFrame[];
+    }[];
+};
+
+export interface IEventline {
+    id: number;
+    name: string;
+
+    key: {
+        id: number;
+        time: number;
+    }[];
+
+    meta?: IMetaData;
 }
 
 /**
@@ -252,23 +306,18 @@ export interface IAnimation {
  *
  * @interface ITimeline
  */
-interface ITimeline {
+export interface ITimeline {
     id: number;
     name: string;
     key: ITimelineKeyFrame[];
 
+    // undefined = "sprite"
+    object_type: "bone" | "point";
+
     // Used to reference Entity.obj_info data.
     obj?: number;
 
-    meta?: {
-        tagline: {
-            key: ITaglineKeyFrame[];
-        };
-
-        valline: {
-            key: IVallineKeyFrame[];
-        }
-    }
+    meta?: IMetaData;
 }
 
 /**
@@ -308,16 +357,6 @@ export interface IMainlineKeyFrame {
      * @memberof IMainlineKeyFrame
      */
     object_ref: IObjectRef[];
-
-    // Injected when file is parsed.
-
-    /**
-     * The key frame that follows this one.
-     *
-     * @type {IMainlineKeyFrame}
-     * @memberof IMainlineKeyFrame
-     */
-    next?: IMainlineKeyFrame;
 }
 
 /**
@@ -331,9 +370,6 @@ export interface IBoneRef {
     key: number;
     timeline: number;
     parent: number;
-
-    // Injected when file is parsed.
-    name: string;
 }
 
 /**
@@ -348,9 +384,6 @@ export interface IObjectRef {
     parent: number;
     timeline: number;
     z_index: number;
-
-    // Injected when file is parsed.
-    name: string;
 }
 
 /**
@@ -389,33 +422,29 @@ export interface ITimelineKeyFrame {
     /**
      * The target properties for this keyframe.
      *
-     * @type {IObjectState}
+     * @type {ITimelineObject}
      * @memberof ITimelineKeyFrame
      */
-    object?: IObjectState;
+    object?: ITimelineObject;
 
     /**
      * The target properties for this keyframe.
      *
-     * @type {IBoneState}
+     * @type {ITimelineBone}
      * @memberof ITimelineKeyFrame
      */
-    bone?: IBoneState;
+    bone?: ITimelineBone;
 }
 
-export interface IBoneState {
+export interface ITimelineBone {
     angle: number;
     scale_x: number;
     scale_y: number;
     x: number;
     y: number;
-
-    // Injected when file is parsed.
-    id: number;
-    name: string;
 }
 
-export interface IObjectState {
+export interface ITimelineObject {
     angle: number;
     file: number;
     folder: number;
@@ -424,14 +453,9 @@ export interface IObjectState {
     x: number;
     y: number;
     a: number;
-
-    // Injected when file is parsed.
-    id: number;
-    name: string;
-    z_index: number;
 }
 
-interface ITaglineKeyFrame {
+export interface ITaglineKeyFrame {
     id: number;
     time: number;
     tag: {
@@ -446,12 +470,8 @@ interface ITaglineKeyFrame {
     }[];
 }
 
-interface IVallineKeyFrame {
-    def: number,
-    id: 0,
-    key: {
-        id: number;
-        time: number;
-        val: number | string;
-    }[];
+export interface IVallineKeyFrame {
+    id: number;
+    time: number;
+    val: number | string;
 }

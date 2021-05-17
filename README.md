@@ -1,8 +1,12 @@
 # pixi-spriter
 
-The `pixi-spriter` library provides a simple set of classes to (hopefully) make it easy to add animations exported from [Spriter Pro](https://brashmonkey.com/spriter-pro/) in you [pixi.js](https://www.pixijs.com/) projects!
+The `pixi-spriter` library provides a simple set of classes to (hopefully) make it easy to add animations exported from [Spriter Pro](https://brashmonkey.com/spriter-pro/) in your [pixi.js](https://www.pixijs.com/) projects!
 
 ## Features
+
+This is currently a massive WIP - features are largely being developed in the order in which they're required for my own projects. Feel free to raise tickets for feature requests on the [issues](https://github.com/brinsleylogic/pixi-spriter/issues) page.
+
+Prior to v1.0.0 this repo won't use semanyic versioning as I'd like to have everythign a bit more stable before producing a v1 release. Thereafter it will adhere to semantic versioning rules :)
 
 ### Loading
 
@@ -23,7 +27,7 @@ The `pixi-spriter` library provides a simple set of classes to (hopefully) make 
   - [ ] Smoothly blend animations.
 - [x] Change playback speed.
   - [ ] Allow for negative speed values (reversed playback).
-- [ ] Timeline tags.
+- [x] Timeline tags.
 - [ ] Timeline variables.
 - [ ] Timeline triggers.
 - [ ] Timeline audio events.

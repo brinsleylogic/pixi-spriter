@@ -1,5 +1,5 @@
-import { IAnimation, IMainlineKeyFrame } from "../../file/ISpriterFile";
-import { IBoneState, ISpriteState } from "./IAnimatorState";
+import { IAnimation, IMainlineKeyFrame } from "../../file/IParsedFile";
+import { IBoneState, ISpriteState } from "../IAnimatorState";
 
 /**
  * Retrieves the data that represents the state of the animation on the supplied key frame/
@@ -10,7 +10,7 @@ import { IBoneState, ISpriteState } from "./IAnimatorState";
  * @returns {IFrame}
  */
 export default function getKeyFrameData(animation: IAnimation, keyFrame: IMainlineKeyFrame): IFrame {
-    let bones = [], sprites = [];
+    let bones = [], sprites = [], points = [];
 
     let i = keyFrame.bone_ref.length;
 
@@ -21,6 +21,7 @@ export default function getKeyFrameData(animation: IAnimation, keyFrame: IMainli
         bones[i] = {
             ...timeline.key[ref.key].bone,
             parent: ref.parent,
+            timeline: ref.timeline,
         };
     }
 
@@ -30,16 +31,24 @@ export default function getKeyFrameData(animation: IAnimation, keyFrame: IMainli
         const ref = keyFrame.object_ref[i];
         const timeline = animation.timeline[ref.timeline];
 
-        sprites[i] = {
+        const data = {
             ...timeline.key[ref.key].object,
             parent: ref.parent,
+            timeline: ref.timeline,
         };
+
+        if (timeline.object_type === "point") {
+            points.push(data);
+        } else {
+            sprites.push(data);
+        }
     }
 
-    return { bones, sprites };
+    return { bones, sprites, points };
 }
 
 interface IFrame {
     bones: IBoneState[];
     sprites: ISpriteState[];
+    points: ISpriteState[];
 }

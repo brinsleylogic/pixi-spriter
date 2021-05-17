@@ -1,6 +1,6 @@
 {
     "name": "pixi-spriter",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "private": true,
     "description": "Spriter animation playback engine for pixi.js.",
     "scripts": {
@@ -39,7 +39,7 @@
     },
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/brinsleylogic/pixi-spriter/issues"
+        "url": "https://github.com/brinsleylogic/pixi-spriter/labels/%E2%9A%A0%EF%B8%8F%20Bug"
     },
     "homepage": "https://github.com/brinsleylogic/pixi-spriter#readme"
 }

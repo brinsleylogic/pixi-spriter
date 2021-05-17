@@ -1,4 +1,4 @@
-import IAnimatorState, { IBoneState, ISpriteState } from "../state/IAnimatorState";
+import IAnimatorState, { IBoneState, ISpriteState } from "../IAnimatorState";
 
 /**
  * Parses the animation to provide a snapshot of the current state.

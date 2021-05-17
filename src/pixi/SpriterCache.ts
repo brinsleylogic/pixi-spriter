@@ -1,5 +1,6 @@
 import { Texture } from "@pixi/core";
-import ISpriterFile, { IFile } from "../file/ISpriterFile";
+import { IFile } from "../file/ISpriterFile";
+import IParsedFile from "../file/IParsedFile";
 
 /**
  * Static class for caching data related to Spriter files.
@@ -31,7 +32,7 @@ export default class SpriterCache {
      * @param {ISpriterFile} file The file to process.
      * @memberof SpriterCache
      */
-    public static cache(name: string, file: ISpriterFile): void {
+    public static cache(name: string, file: IParsedFile): void {
         this._fileCache ??= {};
         this._defaultName ??= name;
 

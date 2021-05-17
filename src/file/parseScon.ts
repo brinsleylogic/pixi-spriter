@@ -1,4 +1,4 @@
-import ISpriterFile from "./ISpriterFile";
+import IParsedFile from "./IParsedFile";
 
 /**
  * Parses the supplied Spriter file data and returns the result.
@@ -7,8 +7,8 @@ import ISpriterFile from "./ISpriterFile";
  * @param {string} jsonString The file data to process.
  * @returns {ISpriterFile}
  */
-export default function parseScon(jsonString: string, engine?: string): ISpriterFile {
-    const data: ISpriterFile = JSON.parse(jsonString, (key, value) => {
+export default function parseScon(jsonString: string, engine?: string): IParsedFile {
+    const data: IParsedFile = JSON.parse(jsonString, (key, value) => {
         if (value === "false") {
             return false;
         }
@@ -62,9 +62,9 @@ export default function parseScon(jsonString: string, engine?: string): ISpriter
 /**
  * Normalises data in to a consistent format.
  *
- * @param {ISpriterFile} data The data to process.
+ * @param {IParsedFile} data The data to process.
  */
-function process(data: ISpriterFile): void {
+function process(data: IParsedFile): void {
     data.entity.forEach((entity) => {
         entity.animation.forEach((anim) => {
             // Animations loop by default.
@@ -72,26 +72,52 @@ function process(data: ISpriterFile): void {
                 anim.looping = true;
             }
 
-            // Sort the keyframes for each type of timeline.
+            // Process timelines.
 
-            anim.timeline.forEach((timeline) => {
-                timeline.key.sort(sortFrames);
+            const timelines = anim.timeline;
+
+            timelines.forEach((timeline) => {
+                if (timeline.meta == null) {
+                    return;
+                }
+
+                // Process the tags for the timeline.
+                const tagline = timeline.meta.tagline;
+
+                if (tagline) {
+                    const length = tagline.key.length;
+
+                    tagline.key.forEach((line, index) => {
+                        line.time ??= 0;
+
+                        // Track the next frame.
+                        if (anim.looping) {
+                            line.next = tagline.key[(index + 1) % length];
+                        } else if (index < length - 1) {
+                            line.next = tagline.key[index + 1];
+                        }
+
+                        // Get tags in frame.
+                        if (line.tag.length) {
+                            line.tags = [];
+                            line.tag.forEach((tag) => {
+                                line.tags.push(data.tag_list[tag.t].name);
+                            });
+                        }
+
+                        delete line.tag;
+                    });
+                }
             });
 
-            anim.soundline?.forEach((timeline) => {
-                timeline.key.sort(sortFrames);
-            });
-
-            anim.eventline?.forEach((timeline) => {
-                timeline.key.sort(sortFrames);
-            });
+            // Process the objects in the main timeline.
 
             const keyFrames = anim.mainline.key;
             const length = keyFrames.length;
 
-            keyFrames.sort(sortFrames);
-
             keyFrames.forEach((frame, index) => {
+                frame.time ??= 0;
+
                 // Track the next frame.
                 if (anim.looping) {
                     frame.next = keyFrames[(index + 1) % length];
@@ -127,27 +153,9 @@ function process(data: ISpriterFile): void {
                     obj.a ??= 1;
 
                     obj.name = ref.name = timeline.name;
+                    obj.type = timeline.object_type;
                 });
             })
         });
     });
-}
-
-/**
- * Frame sorting function.
- *
- * @returns {number}
- */
-function sortFrames(a: { time: number }, b: { time: number }): number {
-    if (a.time == null) {
-        a.time = 0;
-        return -1;
-    }
-
-    if (b.time == null) {
-        b.time = 0;
-        return 1;
-    }
-
-    return a.time - b.time;
 }
