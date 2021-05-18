@@ -27,7 +27,7 @@ export default class DemoScene extends Container {
 
         for (let i = 0; i < 1; i++) {
             const anim = this.createAnim(
-                "idle",
+                "walk",
                 window.innerWidth * 0.5,
                 window.innerHeight * 0.5
             );
@@ -45,16 +45,16 @@ export default class DemoScene extends Container {
     }
 
     public createAnim(anim: string, x: number, y: number): Spriter {
-        const container = new Spriter();
-        container.setParent(this);
+        const spriter = new Spriter();
+        spriter.setParent(this);
 
-        container.setEntity(this._data.entity[0])
+        spriter.setEntity(this._data.entity[0])
             .setAnimation(anim)
             .position.set(x, y);
 
-        this._animations.push(container);
+        this._animations.push(spriter);
 
-        return container;
+        return spriter;
     }
 }
 

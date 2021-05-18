@@ -2,7 +2,9 @@ import { IAnimation, IEntity, IMainlineKeyFrame, ITaglineKeyFrame } from "../fil
 import AnimationState from "./animation/AnimationState";
 import Event from "./Event";
 import IAnimatorState, { IBoneState } from "./IAnimatorState";
+import clamp from "../utils/clamp";
 import extrapolate from "../utils/extrapolate";
+import wrap from "../utils/wrap";
 
 /**
  * Responsible for interfacing with and translating the Spriter animations/timelines in to something more usable.
@@ -264,10 +266,10 @@ export default class Animator {
         const playTime = this._playTime;
 
         if (animation.looping) {
-            this._playTime = (this._playTime + delta) % duration;
+            this._playTime = wrap(this._playTime + delta, 0, duration);
         } else {
-            this._playTime = Math.min(this._playTime + delta, duration);
-            this._playing = (this._playTime < duration);
+            this._playTime = clamp(this._playTime + delta, 0, duration);
+            this._playing = (0 < this._playTime && this._playTime < duration);
         }
 
         let state: IAnimatorState;

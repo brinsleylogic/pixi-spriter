@@ -26,10 +26,10 @@ Prior to v1.0.0 this repo won't use semanyic versioning as I'd like to have ever
 - [x] Play and set animations.
   - [ ] Smoothly blend animations.
 - [x] Change playback speed.
-  - [ ] Allow for negative speed values (reversed playback).
+  - [x] Use negative speed values for reversed playback.
 - [x] Timeline tags.
 - [ ] Timeline variables.
-- [ ] Timeline triggers.
+- [ ] Timeline events.
 - [ ] Timeline audio events.
 
 ## Performance
