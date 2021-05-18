@@ -276,25 +276,11 @@ export default class Animator {
 
         // Get blended animation while transitioning.
         if (this._next) {
-            // TODO: Handle blending.
-            // state = this.getTransitionState(animation, this._next, this._playTime);
+            state = this.getTransitionState(animation, this._next, this._playTime);
 
         // Get the simple interpolated state.
         } else {
-            const [startFrame, endFrame] = this.getKeyFrames(animation.mainline.key, this._playTime, this._currentFrame);
-
-            this._currentFrame = startFrame;
-
-            // Set the end state.
-            if (endFrame == null) {
-                state = AnimationState.from(animation, startFrame);
-
-            // Calculate the current state.
-            } else {
-                const progress = extrapolate(startFrame.time, endFrame.time || animation.length, this._playTime);
-
-                state = AnimationState.from(animation, startFrame, endFrame, progress);
-            }
+            state = this.getState(animation, this._playTime, true);
         }
 
         this._currentState = state;
@@ -444,6 +430,91 @@ export default class Animator {
         this._transitionDuration = time;
         this._transitionTime = 0;
         this._transitionScale = 0;
+    }
+
+    /**
+     * Indicates whether two key frames can be blended.
+     *
+     * @private
+     * @param {IMainlineKeyFrame} first The key frame form the first animation.
+     * @param {IMainlineKeyFrame} second The key frame form the second animation.
+     * @returns {boolean}
+     * @memberof Animator
+     */
+    private canBlend(first: IMainlineKeyFrame, second: IMainlineKeyFrame): boolean {
+        if (first.bone_ref == null || second.bone_ref == null && first.bone_ref != second.bone_ref) {
+            return false;
+        }
+
+        if (first.bone_ref.length !== second.bone_ref.length) {
+            return false;
+        }
+
+        if (first.object_ref == null || second.object_ref == null && first.object_ref != second.object_ref) {
+            return false;
+        }
+
+        if (first.object_ref.length !== second.object_ref.length) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns the interpolated state of the supplied animations.
+     *
+     * @private
+     * @param {IAnimation} first The first animation to blend.
+     * @param {IAnimation} second The second animation to blend.
+     * @param {number} time The current play time.
+     * @returns {IAnimatorState}
+     * @memberof Animator
+     */
+    private getTransitionState(first: IAnimation, second: IAnimation, time: number): IAnimatorState {
+        const timeforSecond = time / first.length * second.length;
+
+        const [firstStartFrame, firstEndFrame] = this.getKeyFrames(first.mainline.key, time, this._currentFrame);
+        const [secondStartFrame, secondEndFrame] = this.getKeyFrames(second.mainline.key, timeforSecond);
+
+        // If we cant blend just return the state of the first animation.
+        if (!this.canBlend(firstStartFrame, secondStartFrame)) {
+            return this.getState(first, time, true);
+        }
+
+        if (!this.canBlend(firstEndFrame, secondEndFrame)) {
+            return this.getState(first, time, true);
+        }
+
+
+    }
+
+    /**
+     * Returns the inerpolated state of the animation.
+     *
+     * @private
+     * @param {IAnimation} animation The animation to interpolate.
+     * @param {number} time The current play time.
+     * @param {boolean} [setCurrent]
+     * @returns {IAnimatorState}
+     * @memberof Animator
+     */
+    private getState(animation: IAnimation, time: number, setCurrent?: boolean): IAnimatorState {
+        const [startFrame, endFrame] = this.getKeyFrames(animation.mainline.key, time, this._currentFrame);
+
+        if (setCurrent) {
+            this._currentFrame = startFrame;
+        }
+
+        // Set the end state.
+        if (endFrame == null) {
+            return AnimationState.from(animation, startFrame);
+        }
+
+        // Calculate the current state.
+        const progress = extrapolate(startFrame.time, endFrame.time || animation.length, time);
+
+        return AnimationState.from(animation, startFrame, endFrame, progress);
     }
 
     /**
