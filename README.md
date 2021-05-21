@@ -12,26 +12,42 @@ Prior to v1.0.0 this repo won't use semanyic versioning as I'd like to have ever
 
 `pixi-spriter` provides a [Loader Plugin](https://pixijs.download/dev/docs/PIXI.html#ILoaderPlugin) for the `pixi.js` [resource-loader](https://pixijs.download/dev/docs/PIXI.Loader.html).
 
-- [x] Support for `.scon` files.
-- [ ] Support for `.scml` files.
-- [x] Atlas (spritehseet) loading.
+❌ Support for `.scml` files.
+✔️ Support for `.scon` files.
+✔️ Atlas (spritehseet) loading.
 
 ### Display
 
-- [x] Spriter entity display component.
-- [ ] Support for Character Maps.
+✔️ Spriter entity display component.
+❌ Support for Character Maps.
 
 ### Playback
 
-- [x] Play and set animations.
-  - [ ] Smoothly blend animations.
-- [x] Change playback speed.
-  - [x] Use negative speed values for reversed playback.
-- [x] Timeline tags.
-- [ ] Timeline variables.
-- [ ] Timeline events.
-- [ ] Timeline audio events.
+✔️ Play and set animations.
+&nbsp;&nbsp;&nbsp;&nbsp;❌ Smoothly blend animations.
+✔️ Change playback speed.
+&nbsp;&nbsp;&nbsp;&nbsp;✔️ Use negative speed values for reversed playback.
+
+### Tags
+
+Support for checking tags of animations/components is added through a set of functions in the [`TagChecker`](src/animator/TagChecker.ts) file. There aren't any convenience functions added to the display components so that if your project doesn't use the feature then the code won't be in your final bundle (assuming your bundler kaes use of tree-shaking).
+
+### Variables
+
+❌ TODO
+
+### Colliders (Boxes)
+
+❌ TODO
+
+### Events (Action Points)
+
+❌ TODO
+
+### Audio Events
+
+❌ TODO
 
 ## Performance
 
-Still need to benchmark and optimise.
+❌ Still need to benchmark and optimise.

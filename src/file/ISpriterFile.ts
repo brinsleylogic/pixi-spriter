@@ -142,23 +142,12 @@ export interface IEntity {
     /**
      * Provides information about the components used.
      *
-     * @type {(IObjectInfo | IBoneInfo)[]}
+     * @type {((IBoneInfo | IBoxInfo | IEventInfo | IObjectInfo | IPointInfo)[])}
      * @memberof IEntity
      */
-    obj_info: (IBoneInfo | IEventInfo | IObjectInfo)[];
+    obj_info: (IBoneInfo | IBoxInfo | IEventInfo | IObjectInfo | IPointInfo)[];
 
     character_map: ICharacterMap[];
-
-    var_defs?: IVarDef[];
-}
-
-export interface IObjectInfo {
-    type: "sprite" | "point";
-    name: string;
-    frames: {
-        file: number;
-        folder: number;
-    }[];
 
     var_defs?: IVarDef[];
 }
@@ -173,10 +162,44 @@ export interface IBoneInfo {
     var_defs?: IVarDef[];
 }
 
+export interface IObjectInfo {
+    type: "sprite";
+    name: string;
+    frames: {
+        file: number;
+        folder: number;
+    }[];
+
+    var_defs?: IVarDef[];
+}
+
+export interface IPointInfo {
+    type: "point";
+    name: string;
+    frames: {
+        file: number;
+        folder: number;
+    }[];
+
+    var_defs?: IVarDef[];
+}
+
 export interface IEventInfo {
     type: "event";
     name: string;
     frames?: [];
+
+    var_defs?: IVarDef[];
+}
+
+export interface IBoxInfo {
+    type: "box";
+    name: string;
+
+    w: number;
+    h: number,
+    pivot_x: number;
+    pivot_y: number,
 
     var_defs?: IVarDef[];
 }
@@ -312,7 +335,7 @@ export interface ITimeline {
     key: ITimelineKeyFrame[];
 
     // undefined = "sprite"
-    object_type: "bone" | "point";
+    object_type: "bone" | "box" | "point";
 
     // Used to reference Entity.obj_info data.
     obj?: number;
@@ -453,6 +476,8 @@ export interface ITimelineObject {
     x: number;
     y: number;
     a: number;
+
+    z_index?: number;
 }
 
 export interface ITaglineKeyFrame {

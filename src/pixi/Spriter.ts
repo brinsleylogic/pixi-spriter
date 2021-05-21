@@ -1,10 +1,7 @@
 import { Container } from "@pixi/display";
-import { Sprite } from "@pixi/sprite";
 import Animator from "../animator/Animator";
 import Event from "../animator/Event";
-import { IBoneState, ISpriteState } from "../animator/IAnimatorState";
 import { IEntity } from "../file/IParsedFile";
-import SpriterCache from "./SpriterCache";
 import SpriterComponent from "./SpriterComponent";
 
 /**
@@ -28,6 +25,15 @@ export default class Spriter extends Container {
     private _components: SpriterComponent[];
 
     /**
+     * The name of the current animation.
+     *
+     * @readonly
+     * @type {string}
+     * @memberof Spriter
+     */
+    public get animationName(): string { return this._animator?.animation?.name; }
+
+    /**
      * The playback speed fo the animation.
      *
      * @type {number}
@@ -41,7 +47,7 @@ export default class Spriter extends Container {
 
         this._animator = new Animator();
         this._animator.onComplete.add(() => {
-            this.onComplete.dispatch(this._animator.current.name);
+            this.onComplete.dispatch(this._animator.animation.name);
         });
     }
 
@@ -188,7 +194,7 @@ export default class Spriter extends Container {
             let sprite = this._components[data.id];
 
             if (sprite == null) {
-                sprite = new SpriterComponent(this._animator);
+                sprite = new SpriterComponent();
                 sprite.setParent(this._container);
 
                 this._components[data.id] = sprite;
@@ -196,21 +202,5 @@ export default class Spriter extends Container {
 
             sprite.update(data);
         }
-    }
-
-    /**
-     * Indicates whether the named tag is active for this Spriter instance.
-     *
-     * @param {string} name The name of the tag to check.
-     * @param {boolean} [allChildren=false] Indicates whether all children are checked for the tag.
-     * @returns {boolean}
-     * @memberof Spriter
-     */
-    public checkTag(name: string, allChildren?: boolean): boolean {
-        if (allChildren) {
-            return this._animator.checkTag(name);
-        }
-
-        return this._animator.checkTag(name, true);
     }
 }

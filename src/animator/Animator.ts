@@ -1,10 +1,12 @@
-import { IAnimation, IEntity, IMainlineKeyFrame, ITaglineKeyFrame } from "../file/IParsedFile";
+import { IAnimation, IEntity, IMainlineKeyFrame } from "../file/IParsedFile";
 import AnimationState from "./animation/AnimationState";
 import Event from "./Event";
-import IAnimatorState, { IBoneState } from "./IAnimatorState";
+import IAnimatorState from "./IAnimatorState";
 import clamp from "../utils/clamp";
 import extrapolate from "../utils/extrapolate";
 import wrap from "../utils/wrap";
+import getKeyFrames from "./getKeyFrames";
+import { interpolateKeyFrames } from "./animation/AnimationUtils";
 
 /**
  * Responsible for interfacing with and translating the Spriter animations/timelines in to something more usable.
@@ -57,13 +59,31 @@ export default class Animator {
     public get playing(): boolean { return this._playing };
 
     /**
+     * The current playback time of the Animator.
+     *
+     * @readonly
+     * @type {number}
+     * @memberof Animator
+     */
+    public get time(): number { return this._playTime; }
+
+    /**
      * The current animation.
      *
      * @readonly
      * @type {IAnimation}
      * @memberof Animator
      */
-    public get current(): IAnimation { return this._current; }
+    public get animation(): IAnimation { return this._current; }
+
+    /**
+     * The current state of the Animator.
+     *
+     * @readonly
+     * @type {IAnimatorState}
+     * @memberof Animator
+     */
+    public get state(): IAnimatorState { return this._currentState; }
 
     /**
      * The percentage of the playback duration (from 0-1).
@@ -243,25 +263,26 @@ export default class Animator {
 
         const animation = this._current;
 
+        delta *= this.speed;
+
         // Update transition state.
         if (this._next) {
-            delta *= delta * this._transitionScale * (animation.length / this._next.length);
+            delta += delta * this._transitionScale * (animation.length / this._next.length);
 
             // Note: Abs this to cater for playing backwards.
             this._transitionTime += Math.abs(delta);
-            this._transitionScale = this._transitionTime / this._transitionDuration;
 
             if (this._transitionDuration <= this._transitionTime) {
                 const progress = this.progress;
                 this.setAnimation(this._next);
 
                 this.progress = progress;
+            } else {
+                this._transitionScale = this._transitionTime / this._transitionDuration;
             }
         }
 
         // Calculate playback time.
-        delta *= this.speed;
-
         const duration = animation.length;
         const playTime = this._playTime;
 
@@ -276,7 +297,7 @@ export default class Animator {
 
         // Get blended animation while transitioning.
         if (this._next) {
-            state = this.getTransitionState(animation, this._next, this._playTime);
+            state = this.getTransitionState(animation, this._next, this._playTime, this._transitionScale);
 
         // Get the simple interpolated state.
         } else {
@@ -293,107 +314,6 @@ export default class Animator {
     }
 
     /**
-     * Indicates whether the named tag is active through the entire animation.
-     *
-     * @param {string} tag The tag to check.
-     * @returns {boolean}
-     * @memberof Animator
-     */
-    public checkTag(tag: string): boolean;
-
-    /**
-     * Indicates whether the named tag is active.
-     *
-     * @param {string} tag The tag to check.
-     * @param {true} animationOnly Indicates whether only the animation-level tags should be checked.
-     * @returns {boolean}
-     * @memberof Animator
-     */
-    public checkTag(tag: string, animationOnly: true): boolean;
-
-    /**
-     * Indicates whether the named tag is active.
-     *
-     * @param {string} tag The tag to check.
-     * @param {number} [target] The specific component to check. If omitted, all components are checked.
-     * @returns {boolean}
-     * @memberof Animator
-     */
-    public checkTag(tag: string, target?: number): boolean;
-
-    /**
-     * Indicates whether the named tag is active.
-     *
-     * @param {string} tag The tag to check.
-     * @param {number} [target] The specific component to check. If omitted, all components are checked.
-     * @returns {boolean}
-     * @memberof Animator
-     */
-    public checkTag(tag: string, target?: number | boolean): boolean {
-        if (this._currentState == null) {
-            return false;
-        }
-
-        const anim = this._current;
-        const checkTarget = (target != null);
-        const animationOnly = (target === true);
-        const _this = this;
-
-        // Check animation tags.
-        if ((animationOnly || !checkTarget) && anim.meta?.tagline) {
-            if (_checkTagline(anim.meta.tagline.key)) {
-                return true;
-            }
-
-            if (animationOnly) {
-                return false;
-            }
-        }
-
-        if (_hasTag(this._currentState.bones)) {
-            return true;
-        }
-
-        if (_hasTag(this._currentState.sprites)) {
-            return true;
-        }
-
-        return false;
-
-        function _hasTag(group: IBoneState[]): boolean {
-            let i = group.length;
-
-            while (i-- > 0) {
-                const comp = group[i];
-
-                if (checkTarget && comp.timeline !== target) {
-                    continue;
-                }
-
-                const timeline = anim.timeline[comp.timeline];
-
-                if (timeline.meta?.tagline == null) {
-                    continue;
-                }
-
-                return _checkTagline(timeline.meta.tagline.key);
-            }
-
-            return false;
-        }
-
-        function _checkTagline(tagline: ITaglineKeyFrame[]): boolean {
-            const startFrame = _this.getKeyFrames(tagline, _this._playTime)?.[0];
-
-            if (startFrame?.tags == null) {
-                return false;
-            }
-
-            return (startFrame.tags.indexOf(tag) > -1);
-        }
-    }
-
-    /**
      * Sets a new current animation.
      *
      * @private
@@ -407,6 +327,7 @@ export default class Animator {
         }
 
         this._current = animation;
+        this._currentFrame = null;
         this._next = null;
 
         this._playTime = 0;
@@ -422,7 +343,8 @@ export default class Animator {
      * @memberof Animator
      */
     private startTransition(animation: IAnimation, time: number): void {
-        if (animation == this._current) {
+        if (animation === this._current || !time) {
+            this.setAnimation(animation);
             return;
         }
 
@@ -468,14 +390,15 @@ export default class Animator {
      * @param {IAnimation} first The first animation to blend.
      * @param {IAnimation} second The second animation to blend.
      * @param {number} time The current play time.
+     * @param {number} progress The progression (0-1) of the transition.
      * @returns {IAnimatorState}
      * @memberof Animator
      */
-    private getTransitionState(first: IAnimation, second: IAnimation, time: number): IAnimatorState {
+    private getTransitionState(first: IAnimation, second: IAnimation, time: number, progress: number): IAnimatorState {
         const timeforSecond = time / first.length * second.length;
 
-        const [firstStartFrame, firstEndFrame] = this.getKeyFrames(first.mainline.key, time, this._currentFrame);
-        const [secondStartFrame, secondEndFrame] = this.getKeyFrames(second.mainline.key, timeforSecond);
+        const [firstStartFrame, firstEndFrame] = getKeyFrames(first.mainline.key, time, this._currentFrame);
+        const [secondStartFrame, secondEndFrame] = getKeyFrames(second.mainline.key, timeforSecond);
 
         // If we cant blend just return the state of the first animation.
         if (!this.canBlend(firstStartFrame, secondStartFrame)) {
@@ -486,7 +409,11 @@ export default class Animator {
             return this.getState(first, time, true);
         }
 
-
+        return interpolateKeyFrames(
+            this.getState(first, time),
+            this.getState(second, timeforSecond),
+            progress
+        );
     }
 
     /**
@@ -495,19 +422,21 @@ export default class Animator {
      * @private
      * @param {IAnimation} animation The animation to interpolate.
      * @param {number} time The current play time.
-     * @param {boolean} [setCurrent]
+     * @param {boolean} [updateCurrent]
      * @returns {IAnimatorState}
      * @memberof Animator
      */
-    private getState(animation: IAnimation, time: number, setCurrent?: boolean): IAnimatorState {
-        const [startFrame, endFrame] = this.getKeyFrames(animation.mainline.key, time, this._currentFrame);
+    private getState(animation: IAnimation, time: number, updateCurrent?: boolean): IAnimatorState {
+        const isCurrentValid = (this._currentFrame?.animation === animation.id);
 
-        if (setCurrent) {
+        const [startFrame, endFrame] = getKeyFrames(animation.mainline.key, time, (isCurrentValid) ? this._currentFrame : null);
+
+        if (updateCurrent && startFrame !== this._currentFrame) {
             this._currentFrame = startFrame;
         }
 
         // Set the end state.
-        if (endFrame == null) {
+        if (startFrame === endFrame || endFrame == null) {
             return AnimationState.from(animation, startFrame);
         }
 
@@ -516,46 +445,4 @@ export default class Animator {
 
         return AnimationState.from(animation, startFrame, endFrame, progress);
     }
-
-    /**
-     * Returns the animation's key frames for the supplied time.
-     *
-     * @private
-     * @param {IAnimation} animation The animation to get the frames for.
-     * @param {number} time The time to fetch the frames for.
-     * @returns {[IMainlineKeyFrame, IMainlineKeyFrame?]}
-     * @memberof Animator
-     */
-    private getKeyFrames<T extends IKeyFrame>(frames: T[], time: number, selected?: T): [T, T?] {
-        let current = selected ?? frames[0];
-        let iterations = 0;
-
-        do {
-            // Start time of frame is less than the time.
-            if (current.time <= time) {
-                // We're in the last frame.
-                if (current.next == null) {
-                    return [current];
-
-                // We're in the current frame.
-                } else if (time < current.next.time || current.next === frames[0]) {
-                    return [current, current.next] as [T, T];
-                }
-            }
-
-            current = current.next as T;
-
-            if (++iterations === frames.length) {
-                // console.log("Animator.getKeyFrames :: Broke loop.", frames, time);
-                return;
-            }
-        }
-        while (current.next);
-    }
-}
-
-interface IKeyFrame {
-    time: number;
-
-    next?: IKeyFrame;
 }

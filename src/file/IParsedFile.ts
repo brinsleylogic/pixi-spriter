@@ -40,6 +40,8 @@ export interface IAnimation extends Animation {
 }
 
 export interface IMainlineKeyFrame extends MainlineKeyFrame {
+    animation: number;
+
     bone_ref: IBoneRef[];
 
     object_ref: IObjectRef[];
@@ -74,8 +76,6 @@ export interface ITimelineObject extends TimelineObject {
     id: number;
     name: string;
     type: string;
-
-    z_index: number;
 }
 
 export interface IMetaData extends MetaData {

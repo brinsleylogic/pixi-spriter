@@ -63,12 +63,12 @@ function sampleCurveDerivativeX(ax: number, bx: number, cx: number, t: number): 
     return (3 * ax * t + 2 * bx) * t + cx;
 }
 
-function solveEpsilon(duration: number): number {
-    return 1 / (200 * duration);
-}
-
 function solve(ax: number, bx: number, cx: number, ay: number, by: number, cy: number, x: number, epsilon: number): number {
     return sampleCurve(ay, by, cy, solveCurveX(ax, bx, cx, x, epsilon));
+}
+
+function solveEpsilon(duration: number): number {
+    return 1 / (200 * duration);
 }
 
 function solveCurveX(ax: number, bx: number, cx: number, x: number, epsilon: number): number {

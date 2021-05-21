@@ -239,6 +239,12 @@
 										"parent": 13,
 										"timeline": "7",
 										"z_index": "14"
+									},
+									{
+										"id": 15,
+										"key": 0,
+										"timeline": "31",
+										"z_index": "15"
 									}
 								]
 							},
@@ -8209,6 +8215,26 @@
 							],
 							"name": "point_000",
 							"object_type": "point"
+						},
+						{
+							"id": 31,
+							"key": [
+								{
+									"id": 0,
+									"object": {
+										"pivot_x": 0,
+										"pivot_y": 1,
+										"scale_x": 0.9999999999999999,
+										"scale_y": 0.9999999999999999,
+										"x": -46,
+										"y": 223
+									},
+									"spin": 0
+								}
+							],
+							"name": "box_000",
+							"obj": 17,
+							"object_type": "box"
 						}
 					]
 				},
@@ -11212,6 +11238,14 @@
 							"type": "int"
 						}
 					]
+				},
+				{
+					"h": 219,
+					"name": "box_000",
+					"pivot_x": 0,
+					"pivot_y": 0,
+					"type": "box",
+					"w": 97
 				}
 			],
 			"var_defs": [

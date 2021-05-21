@@ -4,6 +4,7 @@ import { Sprite } from "@pixi/sprite";
 import { Text } from "@pixi/text";
 import IParsedFile from "pixi-spriter/file/IParsedFile";
 import Spriter from "pixi-spriter/pixi/Spriter";
+import wrap from "pixi-spriter/utils/wrap";
 
 export default class DemoScene extends Container {
     private readonly _data: IParsedFile;
@@ -11,11 +12,13 @@ export default class DemoScene extends Container {
     private readonly _fps: FpsCounter;
 
     private _animations: Spriter[];
+    private _changeTimer: number;
 
     public constructor(data: IParsedFile) {
         super();
 
         this._data = data;
+        this._changeTimer = 0;
 
         this._container = new Container();
         this._container.setParent(this);
@@ -27,7 +30,7 @@ export default class DemoScene extends Container {
 
         for (let i = 0; i < 1; i++) {
             const anim = this.createAnim(
-                "walk",
+                "idle",
                 window.innerWidth * 0.5,
                 window.innerHeight * 0.5
             );
@@ -42,6 +45,18 @@ export default class DemoScene extends Container {
 
     public update(delta: number): void {
         this._animations.forEach((anim) => anim.update(delta));
+
+        this._changeTimer = wrap(this._changeTimer + delta, 0, 12000);
+
+        if (this._changeTimer < delta) {
+            this._animations.forEach((anim) => {
+                anim.play(
+                    (anim.animationName === "walk")
+                     ? "idle"
+                     : "walk"
+                    , 1000);
+            });
+        }
     }
 
     public createAnim(anim: string, x: number, y: number): Spriter {

@@ -1,5 +1,4 @@
 import { Sprite } from "@pixi/sprite";
-import Animator from "../animator/Animator";
 import { ISpriteState } from "../animator/IAnimatorState";
 import SpriterCache from "./SpriterCache";
 
@@ -10,14 +9,6 @@ import SpriterCache from "./SpriterCache";
  * @extends {Sprite}
  */
 export default class SpriterComponent extends Sprite {
-    /**
-     * The current spriter state data.
-     *
-     * @type {ISpriteState}
-     * @memberof SpriterComponent
-     */
-    private readonly _animator: Animator;
-
     private _id: number;
     private _name: string;
 
@@ -39,18 +30,6 @@ export default class SpriterComponent extends Sprite {
      * @memberof SpriterComponent
      */
     public get name(): string { return this._name; }
-
-    /**
-     * Creates an instance of SpriterComponent.
-     *
-     * @param {Animator} animator The parent @see Animator instance.
-     * @memberof SpriterComponent
-     */
-    public constructor(animator: Animator) {
-        super();
-
-        this._animator = animator;
-    }
 
     /**
      * Sets the state of the component from the supplied data.
@@ -94,16 +73,5 @@ export default class SpriterComponent extends Sprite {
             fileData.pivot_x * fileData.width,
             fileData.pivot_y * fileData.height
         );
-    }
-
-    /**
-     * Indicates whether the named tag is active for this component.
-     *
-     * @param {string} name The tag to check.
-     * @returns {boolean}
-     * @memberof SpriterComponent
-     */
-    public checkTag(name: string): boolean {
-        return this._animator.checkTag(name, this._id);
     }
 }
