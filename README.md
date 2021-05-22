@@ -24,7 +24,7 @@ Prior to v1.0.0 this repo won't use semanyic versioning as I'd like to have ever
 ### Playback
 
 ✔️ Play and set animations.
-&nbsp;&nbsp;&nbsp;&nbsp;❌ Smoothly blend animations.
+&nbsp;&nbsp;&nbsp;&nbsp;✔️ Smoothly blend animations.
 ✔️ Change playback speed.
 &nbsp;&nbsp;&nbsp;&nbsp;✔️ Use negative speed values for reversed playback.
 
