@@ -6,7 +6,7 @@ import clamp from "../utils/clamp";
 import extrapolate from "../utils/extrapolate";
 import wrap from "../utils/wrap";
 import getKeyFrames from "./getKeyFrames";
-import { interpolateKeyFrames } from "./animation/AnimationUtils";
+import { interpolateKeyFrames, IKeyFrameData } from "./animation/AnimationUtils";
 
 /**
  * Responsible for interfacing with and translating the Spriter animations/timelines in to something more usable.
@@ -261,7 +261,7 @@ export default class Animator {
             return;
         }
 
-        const animation = this._current;
+        let animation = this._current;
 
         delta *= this.speed;
 
@@ -277,6 +277,8 @@ export default class Animator {
                 this.setAnimation(this._next);
 
                 this.progress = progress;
+
+                animation = this._current;
             } else {
                 this._transitionScale = this._transitionTime / this._transitionDuration;
             }
@@ -358,25 +360,17 @@ export default class Animator {
      * Indicates whether two key frames can be blended.
      *
      * @private
-     * @param {IMainlineKeyFrame} first The key frame form the first animation.
-     * @param {IMainlineKeyFrame} second The key frame form the second animation.
+     * @param {IKeyFrameData} first The interpolated state from the first animation.
+     * @param {IKeyFrameData} second The interpolated state from the second animation.
      * @returns {boolean}
      * @memberof Animator
      */
-    private canBlend(first: IMainlineKeyFrame, second: IMainlineKeyFrame): boolean {
-        if (first.bone_ref == null || second.bone_ref == null && first.bone_ref != second.bone_ref) {
+    private canBlend(first: IKeyFrameData, second: IKeyFrameData): boolean {
+        if (first.bones.length !== second.bones.length) {
             return false;
         }
 
-        if (first.bone_ref.length !== second.bone_ref.length) {
-            return false;
-        }
-
-        if (first.object_ref == null || second.object_ref == null && first.object_ref != second.object_ref) {
-            return false;
-        }
-
-        if (first.object_ref.length !== second.object_ref.length) {
+        if (first.sprites.length !== second.sprites.length) {
             return false;
         }
 
@@ -397,23 +391,15 @@ export default class Animator {
     private getTransitionState(first: IAnimation, second: IAnimation, time: number, progress: number): IAnimatorState {
         const timeforSecond = time / first.length * second.length;
 
-        const [firstStartFrame, firstEndFrame] = getKeyFrames(first.mainline.key, time, this._currentFrame);
-        const [secondStartFrame, secondEndFrame] = getKeyFrames(second.mainline.key, timeforSecond);
+        const firstState = this.getState(first, time, true);
+        const secondState = this.getState(second, timeforSecond);
 
-        // If we cant blend just return the state of the first animation.
-        if (!this.canBlend(firstStartFrame, secondStartFrame)) {
-            return this.getState(first, time, true);
+        // If we can't blend just return the state of the first animation.
+        if (!this.canBlend(firstState, secondState)) {
+            return firstState;
         }
 
-        if (!this.canBlend(firstEndFrame, secondEndFrame)) {
-            return this.getState(first, time, true);
-        }
-
-        return interpolateKeyFrames(
-            this.getState(first, time),
-            this.getState(second, timeforSecond),
-            progress
-        );
+        return interpolateKeyFrames(firstState, secondState, progress);
     }
 
     /**
