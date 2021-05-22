@@ -13,19 +13,25 @@ Prior to v1.0.0 this repo won't use semanyic versioning as I'd like to have ever
 `pixi-spriter` provides a [Loader Plugin](https://pixijs.download/dev/docs/PIXI.html#ILoaderPlugin) for the `pixi.js` [resource-loader](https://pixijs.download/dev/docs/PIXI.Loader.html).
 
 ❌ Support for `.scml` files.
+
 ✔️ Support for `.scon` files.
+
 ✔️ Atlas (spritehseet) loading.
 
 ### Display
 
 ✔️ Spriter entity display component.
+
 ❌ Support for Character Maps.
 
 ### Playback
 
 ✔️ Play and set animations.
-&nbsp;&nbsp;&nbsp;&nbsp;✔️ Smoothly blend animations.
+
+&nbsp;&nbsp;&nbsp;&nbsp;✔️ Smoothly blend animations
+.
 ✔️ Change playback speed.
+
 &nbsp;&nbsp;&nbsp;&nbsp;✔️ Use negative speed values for reversed playback.
 
 ### Tags
