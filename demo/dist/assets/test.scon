@@ -34,6 +34,16 @@
 							},
 							"name": "TestEvent_1",
 							"obj": 16
+						},
+						{
+							"id": 1,
+							"key": [
+								{
+									"id": 0,
+									"time": 2408
+								}
+							],
+							"name": "TestEvent_2"
 						}
 					],
 					"id": 0,
@@ -8222,6 +8232,7 @@
 								{
 									"id": 0,
 									"object": {
+										"angle": 0,
 										"pivot_x": 0,
 										"pivot_y": 1,
 										"scale_x": 0.9999999999999999,

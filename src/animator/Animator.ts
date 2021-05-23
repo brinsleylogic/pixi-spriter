@@ -1,7 +1,7 @@
-import { IAnimation, IEntity, IMainlineKeyFrame } from "../file/IParsedFile";
+import { IAnimation, IEntity, IEventline, IMainlineKeyFrame } from "../file/IParsedFile";
 import AnimationState from "./animation/AnimationState";
 import Event from "./Event";
-import IAnimatorState from "./IAnimatorState";
+import IAnimatorState, { IEvent } from "./IAnimatorState";
 import clamp from "../utils/clamp";
 import extrapolate from "../utils/extrapolate";
 import wrap from "../utils/wrap";
@@ -37,6 +37,7 @@ export default class Animator {
 
     private _currentFrame: IMainlineKeyFrame;
     private _currentState: IAnimatorState;
+    private _triggeredEvents: string[];
 
     private _playing: boolean;
     private _playTime: number;
@@ -44,10 +45,6 @@ export default class Animator {
     private _transitionDuration: number;
     private _transitionTime: number;
     private _transitionScale: number;
-
-    public constructor() {
-        this.speed = 1;
-    }
 
     /**
      * Indicates whether the animator is currently playing an animation.
@@ -93,6 +90,11 @@ export default class Animator {
      */
     public get progress(): number { return this._playTime / this._current.length; }
     public set progress(value: number) { this._playTime = value * this._current.length; }
+
+    public constructor() {
+        this._triggeredEvents = [];
+        this.speed = 1;
+    }
 
     /**
      *  Sets the Spriter Entity for this Animator to use.
@@ -289,21 +291,27 @@ export default class Animator {
         const playTime = this._playTime;
 
         if (animation.looping) {
-            this._playTime = wrap(this._playTime + delta, 0, duration);
+            this._playTime = wrap(playTime + delta, 0, duration);
         } else {
-            this._playTime = clamp(this._playTime + delta, 0, duration);
+            this._playTime = clamp(playTime + delta, 0, duration);
             this._playing = (0 < this._playTime && this._playTime < duration);
         }
 
-        let state: IAnimatorState;
+        let frameData: IKeyFrameData;
 
         // Get blended animation while transitioning.
         if (this._next) {
-            state = this.getTransitionState(animation, this._next, this._playTime, this._transitionScale);
+            frameData = this.getTransitionState(animation, this._next, this._playTime, this._transitionScale);
 
         // Get the simple interpolated state.
         } else {
-            state = this.getState(animation, this._playTime, true);
+            frameData = this.getState(animation, this._playTime, true);
+        }
+
+        const state: IAnimatorState = frameData as any;
+
+        if (animation.eventline) {
+            state.events = this.getTriggeredEvents(animation.eventline, playTime, this._playTime);
         }
 
         this._currentState = state;
@@ -385,10 +393,10 @@ export default class Animator {
      * @param {IAnimation} second The second animation to blend.
      * @param {number} time The current play time.
      * @param {number} progress The progression (0-1) of the transition.
-     * @returns {IAnimatorState}
+     * @returns {IKeyFrameData}
      * @memberof Animator
      */
-    private getTransitionState(first: IAnimation, second: IAnimation, time: number, progress: number): IAnimatorState {
+    private getTransitionState(first: IAnimation, second: IAnimation, time: number, progress: number): IKeyFrameData {
         const timeforSecond = time / first.length * second.length;
 
         const firstState = this.getState(first, time, true);
@@ -412,7 +420,7 @@ export default class Animator {
      * @returns {IAnimatorState}
      * @memberof Animator
      */
-    private getState(animation: IAnimation, time: number, updateCurrent?: boolean): IAnimatorState {
+    private getState(animation: IAnimation, time: number, updateCurrent?: boolean): IKeyFrameData {
         const isCurrentValid = (this._currentFrame?.animation === animation.id);
 
         const [startFrame, endFrame] = getKeyFrames(animation.mainline.key, time, (isCurrentValid) ? this._currentFrame : null);
@@ -430,5 +438,76 @@ export default class Animator {
         const progress = extrapolate(startFrame.time, endFrame.time || animation.length, time);
 
         return AnimationState.from(animation, startFrame, endFrame, progress);
+    }
+
+    /**
+     * Checks the supplied eventlines and returns the data for any events that have triggered between the supplied times.
+     *
+     * @private
+     * @param {IEventline[]} events The events to check.
+     * @param {number} prevTime The previous update time.
+     * @param {number} curTime The current update time.
+     * @returns {IEvent[]}
+     * @memberof Animator
+     */
+    private getTriggeredEvents(events: IEventline[], prevTime: number, curTime: number): IEvent[] {
+        let output: IEvent[];
+        let i = events.length;
+
+        while (i-- > 0) {
+            const data = events[i];
+            const triggerIndex = this._triggeredEvents.indexOf(data.name);
+
+            let j = data.key.length;
+            let process: boolean;
+
+            while (j-- > 0) {
+                const frame = data.key[j];
+
+                if (prevTime <= frame.time && frame.time < curTime) {
+                    process = true;
+                    break;
+                }
+
+                if (prevTime < curTime) {
+                    continue;
+                }
+
+                if (prevTime <= frame.time && frame.time < curTime) {
+                    process = true;
+                    break;
+                }
+            }
+
+            if (!process) {
+                // Clear the event if it was previously triggered.
+                if (triggerIndex > -1) {
+                    this._triggeredEvents.splice(triggerIndex, 1);
+                }
+
+                continue;
+            }
+
+            // Don't include in the trigger list again until cleared.
+            if (triggerIndex > -1) {
+                continue;
+            }
+
+            this._triggeredEvents.push(data.name);
+
+            const event: IEvent = { name: data.name };
+
+            if (data.meta) {
+                event.metaData = data.meta;
+            }
+
+            if (data.obj != null) {
+                event.infoId = data.obj;
+            }
+
+            (output) ? output.push(event) : output = [event];
+        }
+
+        return output;
     }
 }

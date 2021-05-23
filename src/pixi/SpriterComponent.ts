@@ -1,5 +1,5 @@
 import { Sprite } from "@pixi/sprite";
-import { ISpriteState } from "../animator/IAnimatorState";
+import { IObjectState } from "../animator/IAnimatorState";
 import SpriterCache from "./SpriterCache";
 
 /**
@@ -34,11 +34,11 @@ export default class SpriterComponent extends Sprite {
     /**
      * Sets the state of the component from the supplied data.
      *
-     * @param {ISpriteState} state The data used to update the component's state.
+     * @param {IObjectState} state The data used to update the component's state.
      * @returns {void}
      * @memberof SpriterComponent
      */
-    public update(state: ISpriteState): void {
+    public update(state: IObjectState): void {
         this._id = state.timeline;
         this._name = state.name;
 

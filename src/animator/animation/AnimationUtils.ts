@@ -1,7 +1,7 @@
 import { IAnimation, IMainlineKeyFrame } from "../../file/ISpriterFile";
 import interpolate from "../../utils/interpolate";
 import interpolateAngle from "../../utils/interpolateAngle";
-import { IBoneState, ISpriteState } from "../IAnimatorState";
+import { IBoneState, IObjectState } from "../IAnimatorState";
 
 /**
  * Describes the state of a key frame.
@@ -11,7 +11,9 @@ import { IBoneState, ISpriteState } from "../IAnimatorState";
  */
 export interface IKeyFrameData {
     bones: IBoneState[];
-    sprites: ISpriteState[];
+    sprites: IObjectState[];
+    points: IObjectState[];
+    colliders: IObjectState[];
 }
 
 /**
@@ -23,7 +25,7 @@ export interface IKeyFrameData {
  * @returns {IFrame}
  */
  export function getKeyFrameData(animation: IAnimation, keyFrame: IMainlineKeyFrame): IKeyFrameData {
-    let bones = [], sprites = [];
+    let bones = [], sprites = [], points = [], colliders = [];
 
     let i = keyFrame.bone_ref.length;
 
@@ -52,7 +54,11 @@ export interface IKeyFrameData {
 
         switch (timeline.object_type) {
             case "point":
+                points.push(data);
+                break;
+
             case "box":
+                colliders.push(data);
                 break;
 
             default:
@@ -61,7 +67,7 @@ export interface IKeyFrameData {
         }
     }
 
-    return { bones, sprites };
+    return { bones, sprites, points, colliders };
 }
 
 export function applyParentTransforms(...frameData: IKeyFrameData[]): void {
@@ -79,13 +85,20 @@ export function applyParentTransforms(...frameData: IKeyFrameData[]): void {
             bones.push(bone);
         }
 
-        let j = data.sprites.length;
+        const lists = [data.sprites, data.points, data.colliders];
+
+        let j = lists.length;
 
         while (j-- > 0) {
-            const sprite = data.sprites[j];
+            const objects = lists[j];
+            let n = objects.length;
 
-            if (sprite.parent != null) {
-                applyParentProps(sprite, bones[sprite.parent]);
+            while (n-- > 0) {
+                const object = objects[n];
+
+                if (object.parent != null) {
+                    applyParentProps(object, bones[object.parent]);
+                }
             }
         }
     }
@@ -101,8 +114,10 @@ export function applyParentTransforms(...frameData: IKeyFrameData[]): void {
  * @returns {IKeyFrameData}
  */
 export function interpolateKeyFrames(start: IKeyFrameData, end: IKeyFrameData, progress: number): IKeyFrameData {
-    const bones = [];
-    const sprites = [];
+    const bones = [],
+        sprites = [],
+        points = [],
+        boxes = [];
 
     let i = start.bones.length;
 
@@ -116,9 +131,23 @@ export function interpolateKeyFrames(start: IKeyFrameData, end: IKeyFrameData, p
         sprites[i] = getState(start.sprites[i], end.sprites[i], progress);
     }
 
+    i = start.points.length;
+
+    while (i-- > 0) {
+        points[i] = getState(start.points[i], end.points[i], progress);
+    }
+
+    i = start.colliders.length;
+
+    while (i-- > 0) {
+        boxes[i] = getState(start.colliders[i], end.colliders[i], progress);
+    }
+
     return {
         bones,
         sprites,
+        points,
+        colliders: boxes
     };
 }
 
@@ -133,6 +162,10 @@ export function interpolateKeyFrames(start: IKeyFrameData, end: IKeyFrameData, p
  * @memberof AnimationState
  */
 function getState<T extends IBoneState = IBoneState>(start: T, end: T, progress: number): T {
+    if (end == null) {
+        return start;
+    }
+
     const state: T = {
         id: start.id,
         parent: start.parent,
@@ -194,11 +227,11 @@ function buildState<T extends IBoneState>(state: T, propNames: string[], start: 
  * Applies the properties of the parent to the child transform.
  *
  * @private
- * @param {(IBoneState | ISpriteState)} child The child transform.
+ * @param {(IBoneState | IObjectState)} child The child transform.
  * @param {IBoneState} parent The parent transform.
  * @memberof AnimationState
  */
-function applyParentProps(child: IBoneState | ISpriteState, parent: IBoneState): void {
+function applyParentProps(child: IBoneState | IObjectState, parent: IBoneState): void {
     const x = child.x * parent.scale_x;
     const y = child.y * parent.scale_y;
 

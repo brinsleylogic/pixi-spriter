@@ -3,6 +3,7 @@ import {
     IAnimation as Animation,
     IBoneRef as BoneRef,
     IEntity as Entity,
+    IEventline as Eventline,
     IMainlineKeyFrame as MainlineKeyFrame,
     IMetaData as MetaData,
     IObjectRef as ObjectRef,
@@ -30,6 +31,8 @@ export interface IEntity extends Entity {
 }
 
 export interface IAnimation extends Animation {
+    eventline?: IEventline[];
+
     mainline: {
         key: IMainlineKeyFrame[];
     };
@@ -88,6 +91,10 @@ export interface IMetaData extends MetaData {
         def: number;
         key: IVallineKeyFrame[];
     }[];
+}
+
+export interface IEventline extends Eventline {
+    meta?: IMetaData;
 }
 
 export interface ITaglineKeyFrame extends TaglineKeyFrame {

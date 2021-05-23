@@ -1,5 +1,5 @@
 import { IAnimation, IMainlineKeyFrame } from "../../file/IParsedFile";
-import { applyParentTransforms, getKeyFrameData, interpolateKeyFrames } from "./AnimationUtils";
+import { applyParentTransforms, getKeyFrameData, IKeyFrameData, interpolateKeyFrames } from "./AnimationUtils";
 import IAnimatorState from "../IAnimatorState";
 
 /**
@@ -18,7 +18,7 @@ export default class AnimationState {
      * @param {IMainlineKeyFrame} frame The state of the animation.
      * @memberof AnimationState
      */
-    public static from(animation: IAnimation, frame: IMainlineKeyFrame): IAnimatorState;
+    public static from(animation: IAnimation, frame: IMainlineKeyFrame): IKeyFrameData;
 
     /**
      * Returns the state of the animation using the supplied keyframes.
@@ -29,9 +29,9 @@ export default class AnimationState {
      * @param {number} progress The progression (0-1) between the two frames.
      * @memberof AnimationState
      */
-    public static from(animation: IAnimation, startFrame: IMainlineKeyFrame, endFrame: IMainlineKeyFrame, progress: number): IAnimatorState
+    public static from(animation: IAnimation, startFrame: IMainlineKeyFrame, endFrame: IMainlineKeyFrame, progress: number): IKeyFrameData
 
-    public static from(animation: IAnimation, arg: IMainlineKeyFrame, endFrame?: IMainlineKeyFrame, progress?: number): IAnimatorState {
+    public static from(animation: IAnimation, arg: IMainlineKeyFrame, endFrame?: IMainlineKeyFrame, progress?: number): IKeyFrameData {
         // Just set the state from the supplied `arg`.
         if (endFrame == null) {
             return getKeyFrameData(animation, arg);

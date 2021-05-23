@@ -44,7 +44,9 @@ export default class DemoScene extends Container {
     }
 
     public update(delta: number): void {
-        this._animations.forEach((anim) => anim.update(delta));
+        this._animations.forEach((anim) => {
+            anim.update(delta);
+        });
 
         this._changeTimer = wrap(this._changeTimer + delta, 0, 4000);
 

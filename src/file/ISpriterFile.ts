@@ -176,10 +176,6 @@ export interface IObjectInfo {
 export interface IPointInfo {
     type: "point";
     name: string;
-    frames: {
-        file: number;
-        folder: number;
-    }[];
 
     var_defs?: IVarDef[];
 }
@@ -320,6 +316,8 @@ export interface IEventline {
         id: number;
         time: number;
     }[];
+
+    obj?: number;
 
     meta?: IMetaData;
 }

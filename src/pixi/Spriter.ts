@@ -19,10 +19,26 @@ export default class Spriter extends Container {
      */
     public readonly onComplete = new Event<(animation: string) => void>();
 
+    /**
+     * Invoked when an event is triggered.
+     *
+     * @memberof Spriter
+     */
+    public readonly onEventTrigger = new Event<(event: string) => void>();
+
     private readonly _animator: Animator;
 
     private _container: Container;
     private _components: SpriterComponent[];
+
+    /**
+     * The component responsible for managing playback and key-frame interpolation.
+     *
+     * @readonly
+     * @type {Animator}
+     * @memberof Spriter
+     */
+    public get animator(): Animator { return this._animator; }
 
     /**
      * The name of the current animation.
@@ -49,6 +65,31 @@ export default class Spriter extends Container {
         this._animator.onComplete.add(() => {
             this.onComplete.dispatch(this._animator.animation.name);
         });
+    }
+
+    /**
+     * Indicates whether named event was triggered in the latest call to `update()`.
+     *
+     * @param {string} eventName The name of the event.
+     * @returns {boolean}
+     * @memberof Spriter
+     */
+    public isTriggered(eventName: string): boolean {
+        const triggered = this._animator?.state?.events;
+
+        if (triggered == null) {
+            return false;
+        }
+
+        let i = triggered.length;
+
+        while (i-- > 0) {
+            if (triggered[i].name === eventName) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -201,6 +242,12 @@ export default class Spriter extends Container {
             }
 
             sprite.update(data);
+        }
+
+        if (state.events) {
+            for (let i = 0, l = state.events.length; i < l; i++) {
+                this.onEventTrigger.dispatch(state.events[i].name);
+            }
         }
     }
 }
