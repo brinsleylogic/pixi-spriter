@@ -195,7 +195,7 @@ export interface IBoxInfo {
     w: number;
     h: number,
     pivot_x: number;
-    pivot_y: number,
+    pivot_y: number;
 
     var_defs?: IVarDef[];
 }

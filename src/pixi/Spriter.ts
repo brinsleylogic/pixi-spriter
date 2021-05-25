@@ -3,6 +3,8 @@ import Animator from "../animator/Animator";
 import Event from "../animator/Event";
 import { IEntity } from "../file/IParsedFile";
 import SpriterComponent from "./SpriterComponent";
+import ICollision from "../animator/collision/ICollision";
+import checkCollision from "../animator/collision/checkCollision";
 
 /**
  * The display component for a Spriter entity/animation.
@@ -50,6 +52,15 @@ export default class Spriter extends Container {
     public get animationName(): string { return this._animator?.animation?.name; }
 
     /**
+     * The components of the Spriter entity.
+     *
+     * @readonly
+     * @type {SpriterComponent[]}
+     * @memberof Spriter
+     */
+    public get components(): SpriterComponent[] { return this._components; }
+
+    /**
      * The playback speed fo the animation.
      *
      * @type {number}
@@ -65,31 +76,6 @@ export default class Spriter extends Container {
         this._animator.onComplete.add(() => {
             this.onComplete.dispatch(this._animator.animation.name);
         });
-    }
-
-    /**
-     * Indicates whether named event was triggered in the latest call to `update()`.
-     *
-     * @param {string} eventName The name of the event.
-     * @returns {boolean}
-     * @memberof Spriter
-     */
-    public isTriggered(eventName: string): boolean {
-        const triggered = this._animator?.state?.events;
-
-        if (triggered == null) {
-            return false;
-        }
-
-        let i = triggered.length;
-
-        while (i-- > 0) {
-            if (triggered[i].name === eventName) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -250,4 +236,77 @@ export default class Spriter extends Container {
             }
         }
     }
+
+    /**
+     * Indicates whether named event was triggered in the latest call to `update()`.
+     *
+     * @param {string} eventName The name of the event.
+     * @returns {boolean}
+     * @memberof Spriter
+     */
+    public isTriggered(eventName: string): boolean {
+        const triggered = this._animator?.state?.events;
+
+        if (triggered == null) {
+            return false;
+        }
+
+        let i = triggered.length;
+
+        while (i-- > 0) {
+            if (triggered[i].name === eventName) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Retrieves a Spiter Action Point from the current state.
+     *
+     * @param {string} name the name of the point to retrieve.
+     * @returns {ISpriterPoint}
+     * @memberof Spriter
+     */
+    public getPoint(name: string): ISpriterPoint {
+        const points = this._animator.state?.points;
+
+        if (!points || points.length === 0) {
+            return;
+        }
+
+        let i = points.length;
+
+        while (i-- > 0) {
+            if (points[i].name === name) {
+                return points[i];
+            }
+        }
+    }
+
+    /**
+     * Checks whether the supplied point intersects with the Spriter Boxes of this @see Spriter instance.
+     *
+     * @param {number} x The position on the x-axis in world space.
+     * @param {number} y The position on the y-axis in world space.
+     * @returns {ICollision[]} The collision data for each intersected collider.
+     * @memberof Spriter
+     */
+    public checkCollision(x: number, y: number): ICollision[] {
+        const { x: lx, y: ly } = this.toLocal({ x, y });
+
+        return checkCollision(this._animator, lx, ly);
+    }
+}
+
+/**
+ * Represents a Spriter Action Point.
+ *
+ * @interface ISpriterPoint
+ */
+interface ISpriterPoint {
+    x: number;
+    y: number;
+    angle: number;
 }

@@ -1,4 +1,4 @@
-import Animator from "./Animator";
+import Animator from "../Animator";
 import { checkTagline, hasTag } from "./TagUtils";
 
 /**

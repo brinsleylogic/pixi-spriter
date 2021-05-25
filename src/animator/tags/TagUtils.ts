@@ -1,6 +1,6 @@
-import getKeyFrames from "./getKeyFrames";
-import { IBoneState } from "./IAnimatorState";
-import { IAnimation, ITaglineKeyFrame } from "../file/IParsedFile";
+import getKeyFrames from "../getKeyFrames";
+import { IBoneState } from "../IAnimatorState";
+import { IAnimation, ITaglineKeyFrame } from "../../file/IParsedFile";
 
 /**
  * Checks the timelines of the supplied group for the tag.

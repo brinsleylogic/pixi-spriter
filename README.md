@@ -40,7 +40,7 @@ Prior to v1.0.0 this repo won't use semanyic versioning as I'd like to have ever
 
 ## Tags
 
-Support for checking tags of animations/components is added through a set of functions in the [`TagUtils`](src/animator/TagUtils.ts) module. There aren't any convenience functions added to the display components so that if your project doesn't use the feature then the code won't be in your final bundle (assuming your bundler kaes use of tree-shaking).
+Support for checking [tags](https://brashmonkey.com/spriter_manual/adding%20tags%20to%20an%20animation.htm) of animations/components is added through a set of functions in the [`TagUtils`](src/animator/TagUtils.ts) module. There aren't any convenience functions added to the display components so that if your project doesn't use the feature then the code won't be in your final bundle (assuming your bundler kaes use of tree-shaking).
 
 The [`TagChecker`](src/animator/TagChecker.ts) class provides some convenience methods and can be reused for querying different [`Animator`](src/animator/Animator.ts) instances.
 
@@ -50,15 +50,36 @@ The [`TagChecker`](src/animator/TagChecker.ts) class provides some convenience m
 
 ## Action Points
 
-❌ The state is being interpolated but there are no convience methods or other processing happening for these yet.
+[Action Points](https://brashmonkey.com/spriter_manual/adding%20spawning%20points%20to%20frames.htm) are managed by the [`Animator`](src/animator/Animator.ts) and are interpolated like the other timeline objects (bones, and sprites). They can be retrieved (when available) through the `Spriter.getPoint()` method.
 
-## Colliders (Boxes)
+## Colliders
 
-❌ The state is being interpolated but there are no convience methods or other processing happening for these yet.
+Also known as [Collision Rectangles](https://brashmonkey.com/spriter_manual/adding%20collision%20rectangles%20to%20frames.htm) in Spriter, are also managed by the [`Animator`](src/animator/Animator.ts). Presently only point collisions are supported. Checking for collisions is done either calling [`checkCollisions`](src/animator/collision/checkCollision.ts), or through the conveience method on the [`Spriter`](src/pixi/Spriter.ts) class - which calls `checkCollisions` internall anyway.
 
-## Events
+When calling `checkCollisions` directly, the point supplied must be in the same co-ordinate space as the Animator being queried.
+However, when using the `Spriter` method, the point suplpied needs to be in world (global) space; the method will handle the coordinate translation internally.
 
-The main class ([`Spriter`](src/pixi/Spriter.ts)) allows for checking whether an event was triggered on the latest call to `update()`. `isTriggered` will only return `true` for the first frame when the Event is active - even when playing animaitons at lower speeds. `Spriter` also has an event: `onEventTriggered` which will signal whenever an event is triggered.
+## Event Triggers
+
+The [`Spriter`](src/pixi/Spriter.ts) class allows for checking whether an [event](https://brashmonkey.com/spriter_manual/adding%20event%20triggers%20to%20an%20animation.htm) was triggered on the latest call to `update()`. `isTriggered` will only return `true` for the first frame when the Event is active - even when playing animaitons at lower speeds. `Spriter` also has an event: `onEventTriggered` which will signal whenever an event is triggered.
+
+```js
+const anim = new Spriter();
+
+// Listen for events triggering.
+anim.onEventTriggered.add((event) => {
+    console.log("Event triggered! Name:", event)
+});
+
+...
+
+anim.update(deltaTime);
+
+// Or check in an update loop.
+if (anim.isTriggered("eventName")) {
+    console.log("Event triggered just now: eventName");
+}
+```
 
 ## Audio Events
 

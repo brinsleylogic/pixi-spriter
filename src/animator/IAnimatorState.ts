@@ -34,10 +34,10 @@ export default interface IAnimatorState {
     /**
      * The state of the boxes.
      *
-     * @type {IObjectState[]}
+     * @type {IColliderState[]}
      * @memberof IAnimatorState
      */
-    colliders: IObjectState[];
+    colliders: IColliderState[];
 
     /**
      * The events triggered in this state.
@@ -59,6 +59,14 @@ export interface IEvent {
 export interface IBoneState extends ITimelineBone, IState {}
 
 export interface IObjectState extends ITimelineObject, IState {}
+
+export interface IColliderState extends IObjectState {
+    pivot_x: number;
+    pivot_y: number;
+
+    w: number;
+    h: number;
+}
 
 interface IState {
     parent: number;
