@@ -116,6 +116,7 @@ function process(data: IParsedFile): void {
             const length = keyFrames.length;
 
             keyFrames.forEach((frame, index) => {
+                frame.animation = anim.id;
                 frame.time ??= 0;
 
                 // Track the next frame.
@@ -154,6 +155,18 @@ function process(data: IParsedFile): void {
 
                     obj.name = ref.name = timeline.name;
                     obj.type = timeline.object_type;
+
+                    if (timeline.obj == null) {
+                        return;
+                    }
+
+                    const target: any = obj;
+                    const info: any = entity.obj_info[timeline.obj];
+
+                    if (obj.type === "box") {
+                        target.w = info.w;
+                        target.h = info.h;
+                    }
                 });
             })
         });

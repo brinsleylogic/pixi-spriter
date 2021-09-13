@@ -40,9 +40,9 @@ Prior to v1.0.0 this repo won't use semanyic versioning as I'd like to have ever
 
 ## Tags
 
-Support for checking [tags](https://brashmonkey.com/spriter_manual/adding%20tags%20to%20an%20animation.htm) of animations/components is added through a set of functions in the [`TagUtils`](src/animator/TagUtils.ts) module. There aren't any convenience functions added to the display components so that if your project doesn't use the feature then the code won't be in your final bundle (assuming your bundler kaes use of tree-shaking).
+Support for checking [tags](https://brashmonkey.com/spriter_manual/adding%20tags%20to%20an%20animation.htm) of animations/components is added through a set of functions in the [`TagUtils`](src/animator/tags/TagUtils.ts) module. There aren't any convenience functions added to the display components so that if your project doesn't use the feature then the code won't be in your final bundle (assuming your bundler kaes use of tree-shaking).
 
-The [`TagChecker`](src/animator/TagChecker.ts) class provides some convenience methods and can be reused for querying different [`Animator`](src/animator/Animator.ts) instances.
+The [`TagChecker`](src/animator/tags/TagChecker.ts) class provides some convenience methods and can be reused for querying different [`Animator`](src/animator/Animator.ts) instances.
 
 ## Variables
 
