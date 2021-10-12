@@ -63,6 +63,16 @@ export default class Animator {
      * @memberof Animator
      */
     public get time(): number { return this._playTime; }
+    public set time(value: number) {
+        value = clamp(value, 0, this._current.length);
+
+        if (this._playTime === value) {
+            return;
+        }
+
+        this._playTime = value;
+        this.update(0);
+    }
 
     /**
      * The current animation.
@@ -81,6 +91,15 @@ export default class Animator {
      * @memberof Animator
      */
     public get state(): IAnimatorState { return this._currentState; }
+
+    /**
+     * The current Entity data.
+     *
+     * @readonly
+     * @type {IEntity}
+     * @memberof Animator
+     */
+    public get entity(): IEntity { return this._entity; }
 
     /**
      * The percentage of the playback duration (from 0-1).

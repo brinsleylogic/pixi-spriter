@@ -1,7 +1,8 @@
-import { Loader } from "@pixi/loaders";
+import { Loader, TextureLoader } from "@pixi/loaders";
 import { Resource } from "resource-loader";
 import parseScon from "../file/parseScon";
 import SpriterCache from "./SpriterCache";
+import { IFolder } from "../file/ISpriterFile";
 
 /**
  * Handles parsing of loaded .scon Spriter animation files.
@@ -9,6 +10,22 @@ import SpriterCache from "./SpriterCache";
  * @class SconLoader
  */
 class SconLoader {
+    /**
+     * Indicates whether all assets listed n the scon file (folders and files) should be loaded automatically.
+     *
+     * @static
+     * @type {boolean}
+     * @memberof SconLoader
+     */
+    /**
+     * A list of folders to load automativcally load assets from.
+     *
+     * @static
+     * @type {boolean}
+     * @memberof SconLoader
+     */
+    public static loadAllAssets: boolean | string[] = false;
+
     /**
      * Handles processing of loaded resource.
      *
@@ -45,32 +62,46 @@ class SconLoader {
 
         SpriterCache.cache(resource.name, data);
 
-        // Below here is just atlas loading.
-        if (!data.atlas?.length) {
-            return next?.();
-        }
-
+        // Set up loading additonal files.
         const loader = this as any as Loader;
+        const basePath = resource.name.slice(0,
+            resource.url
+                .replace(loader.baseUrl, "")
+                .lastIndexOf("/") + 1
+        );
 
         const loaderOptions = {
             crossOrigin: resource.crossOrigin,
             parentResource: resource,
         };
 
-        const atlasPath = resource.name.slice(0,
-            resource.url
-                .replace(loader.baseUrl, "")
-                .lastIndexOf("/") + 1
-        );
-
         // Check for loading spritesheets.
-        data.atlas.forEach((atlas) => {
-            const url = atlasPath + atlas.name;
+        if (data.atlas?.length) {
+            data.atlas.forEach((atlas) => {
+                const url = basePath + atlas.name;
 
-            if (!loader.resources[url]) {
-                loader.add(atlas.name, url, loaderOptions);
-            }
-        });
+                if (!loader.resources[url]) {
+                    loader.add(atlas.name, url, loaderOptions);
+                }
+            });
+        }
+
+        // Check for loading assets from scon's folder structure.
+        else if (SconLoader.loadAllAssets) {
+            data.folder.forEach((folder) => {
+                if (!SconLoader.shouldLoadFolder(folder)) {
+                    return;
+                }
+
+                folder.file.forEach((file) => {
+                    const url = basePath + file.name;
+
+                    if (!loader.resources[url]) {
+                        loader.add(file.name, url, loaderOptions);
+                    }
+                });
+            });
+        }
 
         next?.();
     }
@@ -87,7 +118,7 @@ class SconLoader {
             const value = data[key];
 
             if (typeof value === "object") {
-                this.processSpritesheetJson(value);
+                SconLoader.processSpritesheetJson(value);
                 return;
             }
 
@@ -100,6 +131,27 @@ class SconLoader {
                 data[key] = true;
             }
         });
+    }
+
+    /**
+     * Indicates whether assets in the supplied folder should be loaded.
+     *
+     * @private
+     * @static
+     * @param {IFolder} folder the folder to check.
+     * @returns {boolean}
+     * @memberof SconLoader
+     */
+    private static shouldLoadFolder(folder: IFolder): boolean {
+        if (typeof SconLoader.loadAllAssets === "boolean") {
+            return SconLoader.loadAllAssets;
+        }
+
+        if (SconLoader.loadAllAssets.indexOf(folder.name) > -1) {
+            return true;
+        }
+
+        return false;
     }
 }
 

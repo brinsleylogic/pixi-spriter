@@ -30,6 +30,7 @@ export default class Spriter extends Container {
 
     private readonly _animator: Animator;
 
+    private _name: string;
     private _container: Container;
     private _components: SpriterComponent[];
 
@@ -59,6 +60,16 @@ export default class Spriter extends Container {
      * @memberof Spriter
      */
     public get components(): SpriterComponent[] { return this._components; }
+
+    /**
+     * The entity name of the
+     *
+     * @readonly
+     * @type {string}
+     * @memberof Spriter
+     */
+    public get name(): string { return this._name ?? this._animator.entity.name; }
+    public set name(value: string) { this._name = value; }
 
     /**
      * The playback speed fo the animation.

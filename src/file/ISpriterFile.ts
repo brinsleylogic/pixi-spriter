@@ -88,7 +88,7 @@ interface IAtlas {
  *
  * @interface IFolder
  */
-interface IFolder {
+export interface IFolder {
     id: number;
     name: string;
     atlas: number;
