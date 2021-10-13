@@ -40,6 +40,7 @@ class SconLoader {
 
         switch (resource.extension) {
             case "scon":
+                SconLoader.loadAllAssets = true;
                 break;
 
             case "json":
