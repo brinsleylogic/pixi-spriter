@@ -43,7 +43,6 @@ export default class SpriterComponent extends Sprite {
         this._name = state.name;
 
         this.position.set(state.x, state.y);
-        this.scale.set(state.scale_x, state.scale_y);
 
         if (state.z_index != null) {
             this.zIndex = state.z_index;
@@ -53,8 +52,13 @@ export default class SpriterComponent extends Sprite {
             this.angle = state.angle;
         }
 
+        if (state.a != null) {
+            this.alpha = state.a;
+        }
+
         // Update the texture.
         if (state.file == null || state.folder == null) {
+            this.scale.set(state.scale_x, state.scale_y);
             return;
         }
 
@@ -68,6 +72,8 @@ export default class SpriterComponent extends Sprite {
 
         this.width = fileData.width;
         this.height = fileData.height;
+
+        this.scale.set(state.scale_x, state.scale_y);
 
         this.pivot.set(
             fileData.pivot_x * fileData.width,
