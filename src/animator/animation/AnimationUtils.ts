@@ -1,4 +1,3 @@
-import { IAnimation, IMainlineKeyFrame } from "../../file/ISpriterFile";
 import interpolate from "../../utils/interpolate";
 import interpolateAngle from "../../utils/interpolateAngle";
 import { IBoneState, IObjectState } from "../IAnimatorState";
@@ -14,94 +13,6 @@ export interface IKeyFrameData {
     sprites: IObjectState[];
     points: IObjectState[];
     colliders: IObjectState[];
-}
-
-/**
- * Retrieves the data that represents the state of the animation on the supplied key frame/
- *
- * @export
- * @param {IAnimation} animation the animation to process.
- * @param {IMainlineKeyFrame} keyFrame the key frame info.
- * @returns {IFrame}
- */
- export function getKeyFrameData(animation: IAnimation, keyFrame: IMainlineKeyFrame): IKeyFrameData {
-    let bones = [], sprites = [], points = [], colliders = [];
-
-    let i = keyFrame.bone_ref.length;
-
-    while (i-- > 0) {
-        const ref = keyFrame.bone_ref[i];
-        const timeline = animation.timeline[ref.timeline];
-
-        bones[i] = {
-            ...timeline.key[ref.key].bone,
-            parent: ref.parent,
-            timeline: ref.timeline,
-        };
-    }
-
-    i = keyFrame.object_ref.length;
-
-    while (i-- > 0) {
-        const ref = keyFrame.object_ref[i];
-        const timeline = animation.timeline[ref.timeline];
-
-        const data = {
-            ...timeline.key[ref.key].object,
-            parent: ref.parent,
-            timeline: ref.timeline,
-        };
-
-        switch (timeline.object_type) {
-            case "point":
-                points.push(data);
-                break;
-
-            case "box":
-                colliders.push(data);
-                break;
-
-            default:
-                sprites.push(data);
-                break;
-        }
-    }
-
-    return { bones, sprites, points, colliders };
-}
-
-export function applyParentTransforms(...frameData: IKeyFrameData[]): void {
-    let i = frameData.length;
-
-    while (i-- > 0) {
-        const data = frameData[i];
-        const bones = [data.bones[0]];
-
-        for (let j = 1, l = data.bones.length; j < l; j++) {
-            const bone = data.bones[j];
-
-            applyParentProps(bone, bones[bone.parent]);
-
-            bones.push(bone);
-        }
-
-        const lists = [data.sprites, data.points, data.colliders];
-
-        let j = lists.length;
-
-        while (j-- > 0) {
-            const objects = lists[j];
-            let n = objects.length;
-
-            while (n-- > 0) {
-                const object = objects[n];
-
-                if (object.parent != null) {
-                    applyParentProps(object, bones[object.parent]);
-                }
-            }
-        }
-    }
 }
 
 /**
@@ -166,12 +77,13 @@ function getState<T extends IBoneState = IBoneState>(start: T, end: T, progress:
         return start;
     }
 
-    const state: T = {
-        id: start.id,
-        parent: start.parent,
-        name: start.name,
-        timeline: start.timeline,
-    } as any;
+    const state: T = {} as any;
+
+    ["id", "name", "parent", "timeline", "file", "folder", "spin"].forEach(p => {
+        if (start[p] != null) {
+            state[p] = start[p];
+        }
+    });
 
     buildState(state, Object.keys(start), start, end, progress);
     buildState(state, Object.keys(end), start, end, progress);
@@ -218,34 +130,7 @@ function buildState<T extends IBoneState>(state: T, propNames: string[], start: 
         }
 
         state[prop] = (prop === "angle")
-            ? interpolateAngle(s, e, progress)
+            ? interpolateAngle(s, e, progress, state.spin)
             : interpolate(s, e, progress);
-    }
-}
-
-/**
- * Applies the properties of the parent to the child transform.
- *
- * @private
- * @param {(IBoneState | IObjectState)} child The child transform.
- * @param {IBoneState} parent The parent transform.
- * @memberof AnimationState
- */
-function applyParentProps(child: IBoneState | IObjectState, parent: IBoneState): void {
-    const x = child.x * parent.scale_x;
-    const y = child.y * parent.scale_y;
-
-    const parentAngle = parent.angle * Math.PI / 180;
-    const sin = Math.sin(parentAngle);
-    const cos = Math.cos(parentAngle);
-
-    child.x = ((x * cos) - (y * sin)) + parent.x;
-    child.y = ((x * sin) - (y * cos)) + parent.y;
-
-    child.scale_x *= parent.scale_x;
-    child.scale_y *= parent.scale_y;
-
-    if (child.angle != null) {
-        child.angle = Math.sign(parent.scale_x * parent.scale_y) * (child.angle + parent.angle) % 360;
     }
 }

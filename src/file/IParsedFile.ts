@@ -68,6 +68,8 @@ export interface ITimeline extends Timeline {
 export interface ITimelineKeyFrame extends TimelineKeyFrame {
     object?: ITimelineObject;
     bone?: ITimelineBone;
+
+    next?: ITimelineKeyFrame;
 }
 
 export interface ITimelineBone extends TimelineBone {

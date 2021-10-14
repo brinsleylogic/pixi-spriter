@@ -9,8 +9,17 @@ import wrap from "./wrap";
  * @param {number} progress The weighting value (between 0-1).
  * @returns {number}
  */
-export default function interpolateAngle(start: number, end: number, progress: number, useRadians?: boolean): number {
+export default function interpolateAngle(start: number, end: number, progress: number, spin: number, useRadians?: boolean): number {
     const halfAngle = (useRadians) ? Math.PI : 180;
+
+    if (spin > 0 && (end - start) < 0) {
+        end += 360;
+    }
+
+    if (spin < 0 && (end - start) > 0) {
+        end -= 360;
+    }
+
     const angle = wrap(end - start, -halfAngle, halfAngle);
 
     return start + (angle * progress);

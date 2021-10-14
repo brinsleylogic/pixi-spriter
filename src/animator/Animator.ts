@@ -448,15 +448,7 @@ export default class Animator {
             this._currentFrame = startFrame;
         }
 
-        // Set the end state.
-        if (startFrame === endFrame || endFrame == null) {
-            return AnimationState.from(animation, startFrame);
-        }
-
-        // Calculate the current state.
-        const progress = extrapolate(startFrame.time, endFrame.time || animation.length, time);
-
-        return AnimationState.from(animation, startFrame, endFrame, progress);
+        return AnimationState.from(animation, startFrame, time);
     }
 
     /**

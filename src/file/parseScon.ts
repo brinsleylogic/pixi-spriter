@@ -77,6 +77,14 @@ function process(data: IParsedFile): void {
             const timelines = anim.timeline;
 
             timelines.forEach((timeline) => {
+                const length = timeline.key.length;
+
+                // Track the next frame.
+                timeline.key.forEach((frame, index) => {
+                    frame.time ??= 0;
+                    frame.next = timeline.key[(index + 1) % length];
+                });
+
                 if (timeline.meta == null) {
                     return;
                 }

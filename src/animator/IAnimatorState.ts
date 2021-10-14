@@ -68,7 +68,8 @@ export interface IColliderState extends IObjectState {
     h: number;
 }
 
-interface IState {
+export interface IState {
     parent: number;
     timeline: number;
+    spin: number;
 }
