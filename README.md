@@ -4,7 +4,7 @@ The `pixi-spriter` library provides a simple set of classes to (hopefully) make 
 
 This is currently a massive WIP - features are largely being developed in the order in which they're required for my own projects. Feel free to raise tickets for feature requests on the [issues](https://github.com/brinsleylogic/pixi-spriter/issues) page.
 
-Prior to v1.0.0 this repo won't use semanyic versioning as I'd like to have everythign a bit more stable before producing a v1 release. Thereafter it will adhere to semantic versioning rules :)
+Prior to v1.0.0 this repo won't use semantic versioning as I'd like to have everything a bit more stable before producing a v1 release. Thereafter it will adhere to semantic versioning rules :)
 
 # Features
 
@@ -14,25 +14,27 @@ Prior to v1.0.0 this repo won't use semanyic versioning as I'd like to have ever
 
 `pixi-spriter` provides a [Loader Plugin](https://pixijs.download/dev/docs/PIXI.html#ILoaderPlugin) for the `pixi.js` [resource-loader](https://pixijs.download/dev/docs/PIXI.Loader.html).
 
-❌ Support for `.scml` files.
+❌  Support for `.scml` files.
 
-✔️ Support for `.scon` files.
+✔️  Support for `.scon` files.
 
-✔️ Atlas (spritehseet) loading.
+✔️  Atlas (spritehseet) loading.
+
+✔️  Image loading.
 
 ### Display
 
-✔️ Spriter entity display component.
+✔️  Spriter entity display component.
 
-❌ Support for Character Maps.
+❌  Support for Character Maps.
 
 ## Playback
 
-✔️ Play and set animations.
+✔️  Play and set animations.
 
-&nbsp;&nbsp;&nbsp;&nbsp;✔️ Smoothly blend animations.
+&nbsp;&nbsp;&nbsp;&nbsp;✔️  Smoothly blend animations.
 
-&nbsp;&nbsp;&nbsp;&nbsp;❌ Account for animation curves.
+&nbsp;&nbsp;&nbsp;&nbsp;❌  Account for animation curves.
 
 ✔️ Change playback speed.
 
@@ -46,7 +48,7 @@ The [`TagChecker`](src/animator/tags/TagChecker.ts) class provides some convenie
 
 ## Variables
 
-❌ TODO
+❌  TODO
 
 ## Action Points
 
@@ -83,8 +85,8 @@ if (anim.isTriggered("eventName")) {
 
 ## Audio Events
 
-❌ TODO
+❌  TODO
 
 ## Performance
 
-❌ Still need to benchmark and optimise.
+❌  Still need to benchmark and optimise.
