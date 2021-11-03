@@ -124,6 +124,27 @@ export default class AnimationState {
      * @memberof AnimationState
      */
     private static applyParentProps(child: IBoneState | IObjectState, parent: IBoneState): void {
+        
+        if (child.scale_x < 0) {
+            child.scale_x = child.scale_x * -1
+             child.x = child.x *-1
+        }
+
+        if (child.scale_y < 0) {
+            child.scale_y = child.scale_y * -1
+            child.y = child.y *-1
+        }
+
+        if (parent.scale_x < 0) {
+            parent.scale_x = parent.scale_x * -1
+            parent.x = parent.x *-1
+        }
+
+        if (parent.scale_y < 0) {
+            parent.scale_y = parent.scale_y * -1
+            parent.y = parent.y *-1
+        }
+
         const x = child.x * parent.scale_x;
         const y = child.y * parent.scale_y;
 
